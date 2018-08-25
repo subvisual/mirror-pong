@@ -13,11 +13,34 @@ defmodule Pong.Server do
     GenServer.start_link(__MODULE__, game_opts(), name: __MODULE__)
   end
 
+  def join(player_name) do
+    GenServer.call(__MODULE__, {:join, player_name})
+  end
+
   def init(opts) do
     state = %{game: Pong.Game.new(opts)}
 
     {:ok, state}
   end
+
+  def handle_call({:join, player_name}, _from, state) do
+    {reply, new_state} =
+      case add_player(player_name, state) do
+        {:error, :game_full} = error -> {error, state}
+        {:ok, _updated_state} = reply -> reply
+      end
+
+    {:reply, reply, new_state}
+  end
+
+  defp add_player(name, %{player_left: nil} = state),
+    do: {:ok, %{state | player_left: name}}
+
+  defp add_player(name, %{player_right: nil} = state),
+    do: {:ok, %{state | player_right: name}}
+
+  defp add_player(_, _),
+    do: {:error, :game_full}
 
   defp game_opts do
     [
