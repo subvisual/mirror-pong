@@ -10,7 +10,6 @@ defmodule Pong.Game.Paddle do
   @type direction :: :up | :down
 
   alias __MODULE__
-  alias Pong.Game.Settings
 
   # TODO: receive the start positions
   def new({width, length}) do
@@ -23,7 +22,7 @@ defmodule Pong.Game.Paddle do
   end
 
   @spec move(Paddle.t(), Paddle.direction()) :: Paddle.t()
-  def move(paddle, direction) do
+  def move(_paddle, _direction) do
     {:error, :not_implemented}
   end
 end

@@ -1,8 +1,9 @@
 defmodule Pong.Game do
   defstruct [
+    :ball,
     :settings,
-    :paddle,
-    :ball
+    :paddle_left,
+    :paddle_right
   ]
 
   alias __MODULE__
@@ -31,7 +32,7 @@ defmodule Pong.Game do
   Applies the ball movement to the game.
   """
   @spec apply(Game.t()) :: Game.t()
-  def apply(game) do
+  def apply(_game) do
     # 2 cycles: apply and then check for any collisions
     {:error, :not_implemented}
   end
@@ -40,7 +41,7 @@ defmodule Pong.Game do
   Applies movement to one of the paddles.
   """
   @spec move(Game.t(), player_ref(), Paddle.direction()) :: Game.t()
-  def move(game, player, direction) do
+  def move(_game, _player, _direction) do
     {:error, :not_implemented}
   end
 end

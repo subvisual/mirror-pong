@@ -7,7 +7,7 @@ defmodule Pong.Game.Ball do
     :radius
   ]
 
-  @type t :: %Ball{}
+  @type t :: %__MODULE__{}
 
   alias Pong.Game.{Ball, Settings}
 
@@ -23,7 +23,7 @@ defmodule Pong.Game.Ball do
   end
 
   @spec move(Ball.t(), Settings.t()) :: Ball.t()
-  def move(ball, settings) do
+  def move(_ball, _settings) do
     {:error, :not_implemented}
   end
 end

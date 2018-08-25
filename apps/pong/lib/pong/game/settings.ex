@@ -10,7 +10,7 @@ defmodule Pong.Game.Settings do
   def new({width, length}, speed) do
     %__MODULE__{
       board_width: width,
-      board_length: width,
+      board_length: length,
       ball_speed: speed
     }
   end
