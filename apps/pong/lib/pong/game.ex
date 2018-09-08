@@ -11,7 +11,10 @@ defmodule Pong.Game do
 
   @type t :: %__MODULE__{}
   @type player_ref :: :left | :right
+  @type option :: :board | :speed | :ball | :paddle
+  @type arg :: {option(), term()}
 
+  @spec new([arg]) :: Game.t()
   def new(opts) do
     board = Keyword.fetch!(opts, :board)
     speed = Keyword.fetch!(opts, :speed)

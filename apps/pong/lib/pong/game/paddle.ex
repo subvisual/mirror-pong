@@ -8,16 +8,23 @@ defmodule Pong.Game.Paddle do
 
   @type t :: %__MODULE__{}
   @type direction :: :up | :down
+  @type option :: :width | :length
+  @type arg :: {option(), integer()}
 
   alias __MODULE__
 
-  # TODO: receive the start positions
-  def new({width, length}) do
+  @spec new([arg()]) :: Paddle.t()
+  def new(args) do
+    start_x = Keyword.fetch!(args, :start_x)
+    start_y = Keyword.fetch!(args, :start_y)
+    width = Keyword.fetch!(args, :width)
+    length = Keyword.fetch!(args, :length)
+
     %__MODULE__{
       width: width,
       length: length,
-      x: 0,
-      y: 0
+      x: start_x,
+      y: start_y
     }
   end
 

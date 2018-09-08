@@ -8,15 +8,23 @@ defmodule Pong.Game.Ball do
   ]
 
   @type t :: %__MODULE__{}
+  @type option :: :start_x | :start_y | :radius
+  @type arg :: {option(), integer()}
 
   alias Pong.Game.{Ball, Settings}
 
-  # TODO: receive the start (x, y) position
-  def new(radius) do
+  @spec new([arg()]) :: Ball.t()
+  def new(args) do
+    start_x = Keyword.fetch!(args, :start_x)
+    start_y = Keyword.fetch!(args, :start_y)
+    radius = Keyword.fetch!(args, :radius)
+
+    # TODO: randomize initial vector
+
     %__MODULE__{
       radius: radius,
-      x: 0,
-      y: 0,
+      x: start_x,
+      y: start_y,
       vector_x: 0,
       vector_y: 0
     }
