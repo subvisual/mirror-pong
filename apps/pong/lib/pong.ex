@@ -55,10 +55,10 @@ defmodule Pong do
   end
 
   defp add_player(%{player_left: nil} = state),
-    do: {:ok, :player_left, %{state | player_left: true}}
+    do: {:ok, :left, %{state | player_left: true}}
 
   defp add_player(%{player_right: nil} = state),
-    do: {:ok, :player_right, %{state | player_right: true}}
+    do: {:ok, :right, %{state | player_right: true}}
 
   defp add_player(_),
     do: {:error, :game_full}
