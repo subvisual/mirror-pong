@@ -2,12 +2,16 @@
 
 set -e
 
-echo "[setup]: Installing required languages"
+source "./bin/functions"
 
+env=${1:-"dev"}
+
+echo "[setup]: Installing required languages"
 if command -v asdf &>/dev/null; then
   set +e
   asdf plugin-add erlang https://github.com/asdf-vm/asdf-erlang.git 2>/dev/null
   asdf plugin-add elixir https://github.com/asdf-vm/asdf-elixir.git 2>/dev/null
+  asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git 2>/dev/null
   set -e
 
   asdf install
@@ -23,3 +27,7 @@ fi
 echo "[setup]: Installing elixir dependencies"
 MIX_ENV=$env mix local.hex --force
 MIX_ENV=$env mix local.rebar --force
+
+echo "[setup]: Setting up node"
+ensure_yarn_exists
+(cd apps/client && yarn install)
