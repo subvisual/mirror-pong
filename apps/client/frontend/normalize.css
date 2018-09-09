@@ -1,0 +1,18 @@
+html,
+body {
+  height: 100%;
+
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
