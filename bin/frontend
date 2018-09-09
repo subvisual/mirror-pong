@@ -1,0 +1,3 @@
+#!/bin/bash
+
+(cd apps/client && yarn run watch)
