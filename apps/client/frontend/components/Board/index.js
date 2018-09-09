@@ -1,0 +1,36 @@
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+
+import { Stage, Layer } from 'react-konva';
+
+import Paddle from '../Paddle';
+
+import './index.css';
+
+export default class Board extends Component {
+  static propTypes = {
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    paddleMargin: PropTypes.number,
+  };
+
+  static defaultProps = {
+    paddleMargin: 50,
+  };
+
+  render() {
+    const { width, height, paddleMargin } = this.props;
+    return (
+      <Stage width={width} height={height} styleName="root">
+        <Layer>
+          <Paddle x={paddleMargin} y={height / 2} />
+
+          <Paddle
+            x={paddle => width - paddleMargin - paddle.width}
+            y={height / 2}
+          />
+        </Layer>
+      </Stage>
+    );
+  }
+}
