@@ -11,23 +11,14 @@ defmodule Pong.Game do
 
   @type t :: %__MODULE__{}
   @type player_ref :: :left | :right
-  @type option :: :board | :speed | :ball | :paddle
-  @type arg :: {option(), term()}
 
-  @spec new([arg]) :: Game.t()
-  def new(opts) do
-    board = Keyword.fetch!(opts, :board)
-    speed = Keyword.fetch!(opts, :speed)
-    settings = Settings.new(board, speed)
-    ball = Keyword.fetch!(opts, :ball) |> Ball.new()
-    paddle_left = Keyword.fetch!(opts, :paddle) |> Paddle.new()
-    paddle_right = Keyword.fetch!(opts, :paddle) |> Paddle.new()
-
+  @spec new(integer(), integer()) :: Game.t()
+  def new(board_width, board_height) do
     %__MODULE__{
-      ball: ball,
-      settings: settings,
-      paddle_left: paddle_left,
-      paddle_right: paddle_right
+      ball: Ball.new(),
+      settings: Settings.new(board_width, board_height),
+      paddle_left: Paddle.new(),
+      paddle_right: Paddle.new()
     }
   end
 

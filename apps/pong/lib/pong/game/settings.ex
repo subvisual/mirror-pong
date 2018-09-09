@@ -7,14 +7,16 @@ defmodule Pong.Game.Settings do
 
   alias __MODULE__
 
+  import Pong.Config, only: [config!: 2]
+
   @type t :: %__MODULE__{}
 
-  @spec new({integer(), integer()}, integer()) :: Settings.t()
-  def new({width, length}, speed) do
+  @spec new(integer(), integer()) :: Settings.t()
+  def new(width, length) do
     %__MODULE__{
       board_width: width,
       board_length: length,
-      ball_speed: speed
+      ball_speed: config!(Pong, :ball_speed)
     }
   end
 end

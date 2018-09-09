@@ -1,35 +1,36 @@
 defmodule Pong.Game.Paddle do
   defstruct [
     :width,
-    :length,
+    :height,
     :x,
     :y
   ]
 
+  import Pong.Config, only: [config!: 2]
+
   @type t :: %__MODULE__{}
   @type direction :: :up | :down
-  @type option :: :width | :length
-  @type arg :: {option(), integer()}
 
   alias __MODULE__
+  alias Pong.Game.Settings
 
-  @spec new([arg()]) :: Paddle.t()
-  def new(args) do
-    start_x = Keyword.fetch!(args, :start_x)
-    start_y = Keyword.fetch!(args, :start_y)
-    width = Keyword.fetch!(args, :width)
-    length = Keyword.fetch!(args, :length)
+  @spec new() :: Paddle.t()
+  def new do
+    start_x = config!(__MODULE__, :start_x)
+    start_y = config!(__MODULE__, :start_y)
+    height = config!(__MODULE__, :height)
+    width = config!(__MODULE__, :width)
 
     %__MODULE__{
       width: width,
-      length: length,
+      height: height,
       x: start_x,
       y: start_y
     }
   end
 
-  @spec move(Paddle.t(), Paddle.direction()) :: Paddle.t()
-  def move(_paddle, _direction) do
+  @spec move(Paddle.t(), Paddle.direction(), Settings.t()) :: Paddle.t()
+  def move(_paddle, _direction, _settings) do
     {:error, :not_implemented}
   end
 end
