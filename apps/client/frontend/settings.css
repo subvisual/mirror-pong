@@ -1,3 +1,12 @@
 :root {
   --charcoal: #222222;
+  --gallery: #EFEFEF;
+
+  --size-20: 20px;
+  --size-28: 28px;
+  --size-56: 56px;
+  --size-72: 72px;
+  --size-112: 112px;
+
+  --font-family-monospace: "VT323", monospace;
 }

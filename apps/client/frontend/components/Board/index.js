@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Stage, Layer } from 'react-konva';
 
 import Paddle from '../Paddle';
+import RetroText from '../RetroText';
 
 import './index.css';
 
@@ -23,6 +24,14 @@ export default class Board extends Component {
     return (
       <Stage width={width} height={height} styleName="root">
         <Layer>
+          <RetroText
+            text="Mirror Conf"
+            x={width / 2}
+            y={height / 2}
+            offsetX={250}
+            opacity={0.7}
+          />
+
           <Paddle x={paddleMargin} y={height / 2} />
 
           <Paddle

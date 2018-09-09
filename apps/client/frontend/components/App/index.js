@@ -6,6 +6,10 @@ import './index.css';
 
 export default class App extends Component {
   render() {
-    return <Board width={window.innerWidth} height={window.innerHeight} />;
+    return (
+      <div>
+        <Board width={window.innerWidth} height={window.innerHeight} />
+      </div>
+    );
   }
 }
