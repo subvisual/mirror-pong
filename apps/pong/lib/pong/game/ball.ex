@@ -15,7 +15,7 @@ defmodule Pong.Game.Ball do
 
   import Pong.Config, only: [config!: 2]
 
-  alias Pong.Game.{Ball, Settings}
+  alias Pong.Game.{Ball, Board}
 
   @spec new() :: Ball.t()
   def new do
@@ -35,8 +35,8 @@ defmodule Pong.Game.Ball do
     }
   end
 
-  @spec move(Ball.t(), Settings.t()) :: Ball.t()
-  def move(_ball, _settings) do
+  @spec move(Ball.t(), Board.t()) :: Ball.t()
+  def move(_ball, _board) do
     {:error, :not_implemented}
   end
 

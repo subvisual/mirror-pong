@@ -3,7 +3,8 @@ defmodule Pong.Game.Paddle do
     :width,
     :height,
     :x,
-    :y
+    :y,
+    :speed
   ]
 
   import Pong.Config, only: [config!: 2]
@@ -11,26 +12,43 @@ defmodule Pong.Game.Paddle do
   @type t :: %__MODULE__{}
   @type direction :: :up | :down
 
-  alias __MODULE__
-  alias Pong.Game.Settings
+  @default_speed 5
 
-  @spec new() :: Paddle.t()
-  def new do
-    start_x = config!(__MODULE__, :start_x)
+  alias __MODULE__
+  alias Pong.Game.Board
+
+  @spec new(integer()) :: Paddle.t()
+  def new(start_x) do
     start_y = config!(__MODULE__, :start_y)
     height = config!(__MODULE__, :height)
     width = config!(__MODULE__, :width)
+    start_x = start_x + width / 2
 
     %__MODULE__{
       width: width,
       height: height,
       x: start_x,
-      y: start_y
+      y: start_y,
+      speed: @default_speed
     }
   end
 
-  @spec move(Paddle.t(), Paddle.direction(), Settings.t()) :: Paddle.t()
-  def move(_paddle, _direction, _settings) do
-    {:error, :not_implemented}
+  @spec move(Paddle.t(), Paddle.direction(), Board.t()) :: Paddle.t()
+  def move(paddle, direction, board) do
+    paddle
+    |> apply_vector(direction)
+    |> prevent_overflow(board)
+  end
+
+  defp apply_vector(%{y: y} = paddle, :up) do
+    %{paddle | y: y + @default_speed}
+  end
+
+  defp apply_vector(%{y: y} = paddle, :down) do
+    %{paddle | y: y - @default_speed}
+  end
+
+  defp prevent_overflow(paddle, board) do
+    %{paddle | y: min(paddle.y, board.height - paddle.height / 2)}
   end
 end
