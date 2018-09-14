@@ -32,7 +32,9 @@ defmodule Pong do
 
     state = %{
       game: Game.new(board_width, board_height),
-      fps: fps
+      fps: fps,
+      player_left: nil,
+      player_right: nil
     }
 
     {:ok, state}
