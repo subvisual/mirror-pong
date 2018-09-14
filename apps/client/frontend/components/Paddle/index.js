@@ -9,8 +9,8 @@ export default class Paddle extends Component {
   static propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    x: PropTypes.oneOf([PropTypes.number, PropTypes.func]).isRequired,
-    y: PropTypes.oneOf([PropTypes.number, PropTypes.func]).isRequired,
+    x: PropTypes.oneOfType([PropTypes.number.isRequired, PropTypes.func.isRequired]).isRequired,
+    y: PropTypes.oneOfType([PropTypes.number.isRequired, PropTypes.func.isRequired]).isRequired,
   };
 
   static defaultProps = {
