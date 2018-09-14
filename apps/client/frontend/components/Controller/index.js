@@ -5,14 +5,12 @@ import { Socket } from 'phoenix';
 import './index.css';
 
 export default class Controller extends Component {
-  socket = new Socket('/socket');
-
   componentWillMount() {
+    this.socket = new Socket('/socket');
+
     this.socket.connect();
-
-    window.channel = this.socket.channel('game:play');
-
-    window.channel
+    this.channel = this.socket.channel('game:play');
+    this.channel
       .join()
       .receive('ok', resp => {
         console.log('Joined successfully', resp); // eslint-disable-line
@@ -20,10 +18,6 @@ export default class Controller extends Component {
       .receive('error', resp => {
         console.log('Unable to join', resp); // eslint-disable-line
       });
-  }
-
-  componentWillUnmount() {
-    this.socket.disconnect();
   }
 
   render() {
