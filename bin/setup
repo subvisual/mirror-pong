@@ -27,6 +27,7 @@ fi
 echo "[setup]: Installing elixir dependencies"
 MIX_ENV=$env mix local.hex --force
 MIX_ENV=$env mix local.rebar --force
+MIX_ENV=$env mix deps.get
 
 echo "[setup]: Setting up node"
 ensure_yarn_exists
