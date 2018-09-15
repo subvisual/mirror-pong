@@ -10,12 +10,14 @@ import './index.css';
 
 export default class Board extends Component {
   static propTypes = {
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
+    width: PropTypes.number,
+    height: PropTypes.number,
     paddleMargin: PropTypes.number,
   };
 
   static defaultProps = {
+    width: window.innerWidth,
+    height: window.innerHeight,
     paddleMargin: 50,
   };
 

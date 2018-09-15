@@ -1,7 +1,7 @@
 defmodule ClientWeb.UserSocket do
   use Phoenix.Socket
 
-  channel("game:*", ClientWeb.GameChannel)
+  channel("game:*", ClientWeb.Channels.GameChannel)
 
   transport(:websocket, Phoenix.Transports.WebSocket)
 

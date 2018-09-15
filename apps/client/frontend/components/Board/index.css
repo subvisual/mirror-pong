@@ -3,3 +3,7 @@
 .root {
   background-color: var(--charcoal);
 }
+
+.button {
+  font-size: 112px;
+}
