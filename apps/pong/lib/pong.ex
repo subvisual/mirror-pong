@@ -21,6 +21,10 @@ defmodule Pong do
     GenServer.call(__MODULE__, :join)
   end
 
+  def leave(player_id) do
+    GenServer.call(__MODULE__, {:leave, player_id})
+  end
+
   def move(player, direction) do
     GenServer.cast(__MODULE__, {:move, player, direction})
   end
@@ -64,4 +68,17 @@ defmodule Pong do
 
   defp add_player(_),
     do: {:error, :game_full}
+
+  def handle_call({:leave, player_id}, _from, state) do
+    {:reply, {:ok}, remove_player(player_id, state)}
+  end
+
+  defp remove_player(:left = player_id, state),
+    do: %{state | player_left: nil}
+
+  defp remove_player(:right = player_id, state),
+    do: %{state | player_right: nil}
+
+  defp remove_player(_) do
+  end
 end
