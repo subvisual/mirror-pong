@@ -8,7 +8,7 @@ export default class Lobby extends Component {
   render() {
     return (
       <div styleName="root">
-        <Link to="/play" styleName="child">
+        <Link to="/play" styleName="center">
           Join
         </Link>
       </div>

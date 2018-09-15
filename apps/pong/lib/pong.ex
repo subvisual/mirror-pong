@@ -47,7 +47,7 @@ defmodule Pong do
   def handle_cast({:move, player, direction}, %{game: game} = state) do
     updated_game = Game.move(game, player, direction)
 
-    {:ok, %{state | game: updated_game}}
+    {:noreply,  %{state | game: updated_game}}
   end
 
   def handle_call(:join, _from, state) do

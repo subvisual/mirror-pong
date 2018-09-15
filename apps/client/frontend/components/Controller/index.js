@@ -1,64 +1,61 @@
 import React, { Component } from 'react';
-
-import { Socket } from 'phoenix';
+import PropTypes from 'prop-types';
 
 import './index.css';
 
 export default class Controller extends Component {
-  state = {
-    loading: true,
-    status: null,
+  static propTypes = {
+    channel: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+    }).isRequired,
   };
-
-  constructor(props) {
-    super(props);
-
-    this.socket = new Socket('/socket');
-
-    this.socket.connect();
-    this.channel = this.socket.channel('game:play');
-    this.joinChannel();
-  }
 
   componentWillUnmount() {
-    this.leaveChannel();
+    this.clearMouse();
   }
 
-  joinChannel = () => {
-    this.channel
-      .join()
-      .receive('ok', resp => {
-        console.log('Joined successfully', resp); // eslint-disable-line
-        this.setState({ loading: false, status: 'joined' });
-      })
-      .receive('error', resp => {
-        console.log('Unable to join', resp); // eslint-disable-line
-        this.setState({ loading: false, status: 'error' });
-      });
+  handleUp = () => {
+    const { channel } = this.props;
+
+    this.mouseInterval = setInterval(
+      () => channel.push('player:move', { direction: 'up' }),
+      15
+    );
   };
 
-  leaveChannel = () => {
-    this.channel
-      .leave()
-      .receive('ok', resp => {
-        console.log('Left successfully', resp); // eslint-disable-line
-        this.socket.disconnect();
-      })
-      .receive('error', resp => {
-        console.log('Could not leave the channel!', resp); // eslint-disable-line
-        this.socket.disconnect();
-      });
+  handleDown = () => {
+    const { channel } = this.props;
+
+    this.mouseInterval = setInterval(
+      () => channel.push('player:move', { direction: 'down' }),
+      15
+    );
+  };
+
+  clearMouse = () => {
+    clearInterval(this.mouseInterval);
   };
 
   render() {
-    const { loading, status } = this.state;
-
-    if (loading) return <div styleName="root" />;
-
     return (
-      <div styleName="root">
-        <div styleName="child">
-          {status === 'joined' ? 'Joined the game!' : "Couldn't join the game!"}
+      <div>
+        <div
+          styleName="arrow"
+          onMouseDown={this.handleUp}
+          onMouseUp={this.clearMouse}
+          onMouseLeave={this.clearMouse}
+          role="presentation"
+        >
+          ↑
+        </div>
+        <div
+          styleName="arrow"
+          onMouseDown={this.handleDown}
+          onMouseUp={this.clearMouse}
+          onMouseLeave={this.clearMouse}
+          role="presentation"
+        >
+          ↓
         </div>
       </div>
     );
