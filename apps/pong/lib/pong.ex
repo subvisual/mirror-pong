@@ -79,6 +79,6 @@ defmodule Pong do
   defp remove_player(:right, state),
     do: %{state | player_right: nil}
 
-  defp remove_player(_, _) do
-  end
+  defp remove_player(_, state),
+    do: state
 end
