@@ -1,25 +1,15 @@
-@import '../../settings.css';
+.arrow {
+  padding: var(--size-20);
 
-.root {
-  position: relative;
-
-  height: 100vh;
-
-  background-color: var(--charcoal);
-}
-
-.child {
-  position: absolute;
-
-  top: 50%;
-  left: 50%;
-
-  padding: var(--size-28);
+  border: 10px solid var(--gallery);
 
   color: var(--gallery);
+  cursor: pointer;
 
   font-family: var(--font-family-monospace);
   font-size: var(--size-112);
+}
 
-  transform: translate(-50%, -50%);
+.arrow:not(:last-child) {
+  margin-bottom: var(--size-28);
 }
