@@ -5,6 +5,12 @@ defmodule ClientWeb.Channels.GameChannel do
     {:ok, socket}
   end
 
+  def join("game:board", _params, socket) do
+    current_state = Pong.game_state()
+
+    {:ok, current_state, socket}
+  end
+
   def join("game:play", _params, socket) do
     case Pong.join() do
       {:ok, player_id} ->
@@ -15,9 +21,11 @@ defmodule ClientWeb.Channels.GameChannel do
     end
   end
 
-  def terminate(msg, socket) do
-    Pong.leave(socket.assigns.player_id)
+  def terminate(_msg, %{assigns: %{player_id: player_id}}) do
+    Pong.leave(player_id)
   end
+
+  def terminate(_, _), do: :ok
 
   def handle_in("player:move", %{"direction" => direction}, socket)
       when direction in ["up", "down"] do

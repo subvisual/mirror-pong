@@ -7,5 +7,5 @@ defmodule ClientWeb.UserSocket do
 
   def connect(_params, socket), do: {:ok, socket}
 
-  def id(socket), do: nil
+  def id(_socket), do: nil
 end
