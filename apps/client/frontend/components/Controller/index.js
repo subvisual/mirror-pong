@@ -10,6 +10,10 @@ export default class Controller extends Component {
     }).isRequired,
   };
 
+  componentWillUnmount() {
+    this.clearMouse();
+  }
+
   handleUp = () => {
     const { channel } = this.props;
 
@@ -28,7 +32,7 @@ export default class Controller extends Component {
     );
   };
 
-  handleMouseUp = () => {
+  clearMouse = () => {
     clearInterval(this.mouseInterval);
   };
 
@@ -38,7 +42,8 @@ export default class Controller extends Component {
         <div
           styleName="arrow"
           onMouseDown={this.handleUp}
-          onMouseUp={this.handleMouseUp}
+          onMouseUp={this.clearMouse}
+          onMouseLeave={this.clearMouse}
           role="presentation"
         >
           ↑
@@ -46,7 +51,8 @@ export default class Controller extends Component {
         <div
           styleName="arrow"
           onMouseDown={this.handleDown}
-          onMouseUp={this.handleMouseUp}
+          onMouseUp={this.clearMouse}
+          onMouseLeave={this.clearMouse}
           role="presentation"
         >
           ↓

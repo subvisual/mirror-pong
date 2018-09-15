@@ -2,6 +2,7 @@
   padding: var(--size-20);
 
   border: 10px solid var(--gallery);
+  user-select: none;
 
   color: var(--gallery);
   cursor: pointer;
