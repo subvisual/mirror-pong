@@ -1,28 +1,18 @@
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Mix.Config module.
-#
-# This configuration file is loaded before any dependency and
-# is restricted to this project.
 use Mix.Config
 
-# General application configuration
 config :client,
   namespace: Client,
   ecto_repos: [Client.Repo]
 
-# Configures the endpoint
 config :client, ClientWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "a35Dprco5Xrme3zE2vuQSwmocRV/eRt/zVOXOX/mKsgF195BHO1a0MGwWoE+ecah",
+  secret_key_base:
+    "a35Dprco5Xrme3zE2vuQSwmocRV/eRt/zVOXOX/mKsgF195BHO1a0MGwWoE+ecah",
   render_errors: [view: ClientWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Client.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: Client.PubSub, adapter: Phoenix.PubSub.PG2]
 
-# Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:user_id]
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

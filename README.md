@@ -1,5 +1,10 @@
+[ci_badge]: https://semaphoreci.com/api/v1/projects/232baef5-cca0-44d5-b2c7-4c37b9eb6382/2217682/badge.svg
+[ci_home]: https://semaphoreci.com/subvisual/mirror-pong
+
 Mirror Pong
 ===========
+
+[![Build Status][ci_badge]][ci_home]
 
 The pong game available at the venue during Mirror Conf 2018.
 

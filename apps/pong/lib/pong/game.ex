@@ -7,7 +7,12 @@ defmodule Pong.Game do
   ]
 
   alias __MODULE__
-  alias Pong.Game.{Ball, Paddle, Board}
+
+  alias Pong.Game.{
+    Ball,
+    Board,
+    Paddle
+  }
 
   import Pong.Config, only: [config!: 2]
 

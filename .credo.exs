@@ -17,7 +17,7 @@
 
         {Credo.Check.Design.AliasUsage, false},
         {Credo.Check.Design.DuplicatedCode, exit_status: 0},
-        {Credo.Check.Design.TagTODO, exit_status: 2},
+        {Credo.Check.Design.TagTODO, exit_status: 0},
         {Credo.Check.Design.TagFIXME, exit_status: 0},
 
         # Readability

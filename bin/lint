@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+echo "[lint]: running the elixir formatter"
+mix format --check-formatted --dot-formatter .formatter.exs
+
+echo "[lint]: running elixir credo"
+mix credo --strict
+
+echo "[lint]: running frontend linters"
+(cd apps/client && yarn run lint)

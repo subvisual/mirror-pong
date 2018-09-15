@@ -17,22 +17,20 @@ defmodule ClientWeb.ConnCase do
 
   using do
     quote do
-      # Import conveniences for testing with connections
       use Phoenix.ConnTest
       import ClientWeb.Router.Helpers
 
-      # The default endpoint for testing
       @endpoint ClientWeb.Endpoint
     end
   end
 
-
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Client.Repo)
+
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(Client.Repo, {:shared, self()})
     end
+
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
-
 end

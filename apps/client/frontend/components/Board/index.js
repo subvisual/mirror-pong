@@ -10,11 +10,25 @@ import RetroText from '../RetroText';
 import './index.css';
 
 export default class Board extends Component {
+  /* eslint react/no-unused-state: 0 */
   state = {
     ball: null,
     board: null,
     paddle_left: null,
     paddle_right: null,
+  };
+  /* eslint react/no-unused-state: 1 */
+
+  static propTypes = {
+    width: PropTypes.number,
+    height: PropTypes.number,
+    paddleMargin: PropTypes.number,
+  };
+
+  static defaultProps = {
+    width: window.innerWidth,
+    height: window.innerHeight,
+    paddleMargin: 50,
   };
 
   constructor(props) {
@@ -62,18 +76,6 @@ export default class Board extends Component {
       this.setState(data);
       console.log(data);
     });
-  };
-
-  static propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number,
-    paddleMargin: PropTypes.number,
-  };
-
-  static defaultProps = {
-    width: window.innerWidth,
-    height: window.innerHeight,
-    paddleMargin: 50,
   };
 
   render() {
