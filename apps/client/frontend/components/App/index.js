@@ -13,7 +13,7 @@ export default class App extends Component {
       <Router>
         <div>
           <Route exact path="/" component={Lobby} />
-          <Route exact path="/controller" component={Controller} />
+          <Route exact path="/play" component={Controller} />
           <Route exact path="/board" component={Board} />
         </div>
       </Router>

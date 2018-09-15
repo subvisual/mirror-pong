@@ -70,15 +70,15 @@ defmodule Pong do
     do: {:error, :game_full}
 
   def handle_call({:leave, player_id}, _from, state) do
-    {:reply, {:ok}, remove_player(player_id, state)}
+    {:reply, :ok, remove_player(player_id, state)}
   end
 
-  defp remove_player(:left = player_id, state),
+  defp remove_player(:left, state),
     do: %{state | player_left: nil}
 
-  defp remove_player(:right = player_id, state),
+  defp remove_player(:right, state),
     do: %{state | player_right: nil}
 
-  defp remove_player(_) do
+  defp remove_player(_, _) do
   end
 end
