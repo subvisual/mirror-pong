@@ -14,15 +14,16 @@ defmodule Pong.Game do
   @type t :: %__MODULE__{}
   @type player_ref :: :left | :right
 
-  @spec new(integer(), integer()) :: Game.t()
-  def new(board_width, board_height) do
+  @spec new :: Game.t()
+  def new do
     paddle_margin = config!(Paddle, :start_x)
+    board = Board.new()
 
     %__MODULE__{
       ball: Ball.new(),
-      board: Board.new(board_width, board_height),
+      board: board,
       paddle_left: Paddle.new(paddle_margin),
-      paddle_right: Paddle.new(board_width - paddle_margin)
+      paddle_right: Paddle.new(board.width - paddle_margin)
     }
   end
 

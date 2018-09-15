@@ -6,13 +6,15 @@ defmodule Pong.Game.Board do
 
   alias __MODULE__
 
+  import Pong.Config, only: [config!: 2]
+
   @type t :: %__MODULE__{}
 
-  @spec new(integer(), integer()) :: Board.t()
-  def new(width, length) do
+  @spec new :: Board.t()
+  def new do
     %__MODULE__{
-      width: width,
-      height: length
+      width: config!(Pong.Game.Board, :width),
+      height: config!(Pong.Game.Board, :height)
     }
   end
 end

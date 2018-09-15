@@ -7,14 +7,8 @@ defmodule Pong do
 
   @fps 60
 
-  def start(board_width, board_height) do
-    opts = [
-      fps: config(Pong, :fps, @fps),
-      board_width: board_width,
-      board_height: board_height
-    ]
-
-    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def join do
@@ -29,14 +23,10 @@ defmodule Pong do
     GenServer.cast(__MODULE__, {:move, player, direction})
   end
 
-  def init(opts) do
-    fps = Keyword.fetch!(opts, :fps)
-    board_width = Keyword.fetch!(opts, :board_width)
-    board_height = Keyword.fetch!(opts, :board_height)
-
+  def init(:ok) do
     state = %{
-      game: Game.new(board_width, board_height),
-      fps: fps,
+      game: Game.new(),
+      fps: config(Pong, :fps, @fps),
       player_left: nil,
       player_right: nil
     }
@@ -60,6 +50,10 @@ defmodule Pong do
     end
   end
 
+  def handle_call({:leave, player_id}, _from, state) do
+    {:reply, :ok, remove_player(player_id, state)}
+  end
+
   defp add_player(%{player_left: nil} = state),
     do: {:ok, :left, %{state | player_left: true}}
 
@@ -68,10 +62,6 @@ defmodule Pong do
 
   defp add_player(_),
     do: {:error, :game_full}
-
-  def handle_call({:leave, player_id}, _from, state) do
-    {:reply, :ok, remove_player(player_id, state)}
-  end
 
   defp remove_player(:left, state),
     do: %{state | player_left: nil}
