@@ -9,14 +9,28 @@ export default class Paddle extends Component {
   static propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    x: PropTypes.oneOfType([PropTypes.number.isRequired, PropTypes.func.isRequired]).isRequired,
-    y: PropTypes.oneOfType([PropTypes.number.isRequired, PropTypes.func.isRequired]).isRequired,
+    x: PropTypes.oneOfType([
+      PropTypes.number.isRequired,
+      PropTypes.func.isRequired,
+    ]).isRequired,
+    y: PropTypes.oneOfType([
+      PropTypes.number.isRequired,
+      PropTypes.func.isRequired,
+    ]).isRequired,
+    fill: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
   };
 
   static defaultProps = {
     width: 20,
     height: 200,
+    fill: Konva.Util.getRandomColor,
   };
+
+  constructor(props) {
+    super(props);
+
+    this.fill = this.evalFill();
+  }
 
   evalCoordinate(coord) {
     const { width, height } = this.props;
@@ -28,6 +42,16 @@ export default class Paddle extends Component {
     return coord;
   }
 
+  evalFill() {
+    const { fill } = this.props;
+
+    if (_.isFunction(fill)) {
+      return fill();
+    }
+
+    return fill;
+  }
+
   render() {
     const { width, height, x, y } = this.props;
 
@@ -37,7 +61,7 @@ export default class Paddle extends Component {
         y={this.evalCoordinate(y) - height / 2}
         width={width}
         height={height}
-        fill={Konva.Util.getRandomColor()}
+        fill={this.fill}
       />
     );
   }
