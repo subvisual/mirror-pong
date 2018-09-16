@@ -21,14 +21,13 @@ defmodule Pong.Game do
 
   @spec new :: Game.t()
   def new do
-    paddle_margin = config!(Paddle, :start_x)
     board = Board.new()
 
     %__MODULE__{
       ball: Ball.new(),
       board: board,
-      paddle_left: Paddle.new(paddle_margin),
-      paddle_right: Paddle.new(board.width - paddle_margin)
+      paddle_left: Paddle.new(y: board.height / 2),
+      paddle_right: Paddle.new(y: board.height / 2, relative_to: board.width)
     }
   end
 

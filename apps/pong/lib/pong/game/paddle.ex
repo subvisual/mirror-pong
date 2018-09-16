@@ -17,12 +17,19 @@ defmodule Pong.Game.Paddle do
   alias __MODULE__
   alias Pong.Game.Board
 
-  @spec new(integer()) :: Paddle.t()
-  def new(start_x) do
-    start_y = config!(__MODULE__, :start_y)
+  @spec new(keyword()) :: Paddle.t()
+  def new(args) do
     height = config!(__MODULE__, :height)
+    margin = config!(__MODULE__, :margin)
     width = config!(__MODULE__, :width)
-    start_x = start_x + width / 2
+
+    start_y = Keyword.fetch!(args, :y)
+
+    start_x =
+      case Keyword.get(args, :relative_to) do
+        nil -> margin + width / 2
+        offset -> offset - margin - width / 2
+      end
 
     %__MODULE__{
       width: width,

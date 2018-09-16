@@ -12,7 +12,6 @@ config :pong, Pong.Game.Ball,
   radius: 5
 
 config :pong, Pong.Game.Paddle,
-  start_x: 10,
-  start_y: 250,
-  width: 5,
-  height: 20
+  width: 10,
+  height: 100,
+  margin: 30
