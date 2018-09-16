@@ -1,4 +1,4 @@
-defmodule Client.PongSubscription do
+defmodule ClientWeb.PongSubscription do
   def create do
     Pong.subscribe(&broadcast_data/1)
   end

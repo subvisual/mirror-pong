@@ -27,7 +27,11 @@ defmodule ClientWeb.Channels.GameChannel do
 
   def terminate(_, _), do: :ok
 
-  def handle_in("player:move", %{"direction" => direction}, socket)
+  def handle_in(
+        "player:move",
+        %{"direction" => direction},
+        %{assigns: %{player_id: _}} = socket
+      )
       when direction in ["up", "down"] do
     Pong.move(socket.assigns.player_id, String.to_atom(direction))
 

@@ -9,7 +9,7 @@ defmodule Client.Application do
       supervisor(ClientWeb.Endpoint, [])
     ]
 
-    Client.PongSubscription.create()
+    ClientWeb.PongSubscription.create()
 
     opts = [strategy: :one_for_one, name: Client.Supervisor]
     Supervisor.start_link(children, opts)
