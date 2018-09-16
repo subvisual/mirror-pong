@@ -16,6 +16,7 @@ export default class Board extends Component {
     board: null,
     paddle_left: null,
     paddle_right: null,
+    loading: true,
   };
   /* eslint react/no-unused-state: 1 */
 
@@ -50,7 +51,7 @@ export default class Board extends Component {
       .join()
       .receive('ok', data => {
         console.log('Joined successfully', data); // eslint-disable-line
-        this.setState(data);
+        this.setState({ ...data, loading: false });
         this.subscribeToData();
       })
       .receive('error', resp => {
@@ -78,8 +79,40 @@ export default class Board extends Component {
     });
   };
 
+  convertPaddle = paddle => {
+    const { x, y, width: paddleWidth, height: paddleHeight } = paddle;
+    const {
+      board: { width: boardWidth, height: boardHeight },
+    } = this.state;
+    const { width, height } = this.props;
+    const widthRatio = width / boardWidth;
+    const heightRatio = height / boardHeight;
+
+    const convertedHeight = paddleHeight * heightRatio;
+    const convertedWidth = paddleWidth * widthRatio;
+    const convertedX = x * widthRatio - convertedWidth / 2;
+    const convertedY = height - (y * heightRatio - convertedHeight / 2);
+
+    return {
+      x: convertedX,
+      y: convertedY,
+      width: convertedWidth,
+      height: convertedHeight,
+    };
+  };
+
   render() {
-    const { width, height, paddleMargin } = this.props;
+    const { loading } = this.state;
+
+    if (loading) return <div styleName="root" />;
+
+    const { paddle_left: paddleLeft, paddle_right: paddleRight } = this.state;
+
+    const convertedPaddleLeft = this.convertPaddle(paddleLeft);
+    const convertedPaddleRight = this.convertPaddle(paddleRight);
+
+    const { width, height } = this.props;
+
     return (
       <Stage width={width} height={height} styleName="root">
         <Layer>
@@ -91,12 +124,9 @@ export default class Board extends Component {
             opacity={0.7}
           />
 
-          <Paddle x={paddleMargin} y={height / 2} />
+          <Paddle {...convertedPaddleLeft} />
 
-          <Paddle
-            x={paddle => width - paddleMargin - paddle.width}
-            y={height / 2}
-          />
+          <Paddle {...convertedPaddleRight} />
         </Layer>
       </Stage>
     );
