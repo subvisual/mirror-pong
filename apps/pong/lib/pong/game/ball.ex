@@ -8,7 +8,6 @@ defmodule Pong.Game.Ball do
     :speed
   ]
 
-  # TODO: Make this parameter increase with time
   @default_speed 5
 
   @type t :: %__MODULE__{}

@@ -2,7 +2,136 @@ defmodule PongTest do
   use ExUnit.Case
   doctest Pong
 
-  test "greets the world" do
-    assert Pong.hello() == :world
+  import Pong.Factory
+  import Mock
+
+  describe "init/1" do
+    test "creates the correct state" do
+      {:ok, state} = Pong.init(:ok)
+
+      assert %{
+               game: _,
+               fps: _,
+               player_left: nil,
+               player_right: nil,
+               subscriptions: []
+             } = state
+    end
+  end
+
+  describe "handle_cast/2 for :move messages" do
+    test "moves the player in the game" do
+      with_mock Pong.Game, move: fn game, _, _ -> game end do
+        game = build(:game)
+        state = build_pong_state(game: game)
+
+        Pong.handle_cast({:move, :left, :up}, state)
+
+        assert called(Pong.Game.move(game, :left, :up))
+      end
+    end
+
+    test "broadcasts the state to the subscribers" do
+      subscriptions = [fn data -> send self(), data end]
+      state = build_pong_state(subscriptions: subscriptions)
+
+      Pong.handle_cast({:move, :left, :up}, state)
+
+      assert_received %Pong.Game{}
+    end
+
+    test "returns the state with an updated game" do
+      game = build(:game)
+      state = build_pong_state(game: game)
+
+      {:noreply, %{game: new_game}} =
+        Pong.handle_cast({:move, :left, :up}, state)
+
+      assert new_game.paddle_left.y > game.paddle_left.y
+    end
+  end
+
+  describe "handle_cast/2 for :subscribe messages" do
+    test "updates the subscriptions" do
+      fun = fn data -> send self(), data end
+      state = build_pong_state()
+
+      {:noreply, new_state} = Pong.handle_cast({:subscribe, fun}, state)
+
+      assert [fun] == new_state.subscriptions
+    end
+  end
+
+  describe "handle_call/3 for :join messages" do
+    test "errors if the game is full" do
+      state = build_pong_state(player_left: true, player_right: true)
+
+      {:reply, error, _} = Pong.handle_call(:join, self(), state)
+
+      assert {:error, :game_full} == error
+    end
+
+    test "adds the left player if no players have joined" do
+      state = build_pong_state()
+
+      {:reply, _, new_state} = Pong.handle_call(:join, self(), state)
+
+      assert new_state[:player_left]
+    end
+
+    test "adds the right player if there is a left player" do
+      state = build_pong_state(player_left: true)
+
+      {:reply, _, new_state} = Pong.handle_call(:join, self(), state)
+
+      assert new_state[:player_right]
+    end
+
+    test "returns the player tag" do
+      state = build_pong_state()
+
+      {:reply, reply, _} = Pong.handle_call(:join, self(), state)
+
+      assert {:ok, :left} == reply
+    end
+  end
+
+  describe "handle_call/3 for :leave messages" do
+    test "removes the correct player from the state" do
+      state = build_pong_state(player_right: true)
+
+      {:reply, :ok, new_state} =
+        Pong.handle_call({:leave, :right}, self(), state)
+
+      refute new_state[:player_right]
+    end
+
+    test "ignores changes if the player id is invalid" do
+      state = build_pong_state(player_right: true)
+
+      assert {:reply, :ok, ^state} =
+               Pong.handle_call({:leave, :fake_id}, self(), state)
+    end
+  end
+
+  describe "handle_call/3 for :game_state messages" do
+    test "returns the game state" do
+      %{game: game} = state = build_pong_state()
+
+      assert {:reply, ^game, ^state} =
+               Pong.handle_call(:game_state, self(), state)
+    end
+  end
+
+  defp build_pong_state(overrides \\ []) do
+    [
+      game: build(:game),
+      fps: 60,
+      player_left: nil,
+      player_right: nil,
+      subscriptions: []
+    ]
+    |> Keyword.merge(overrides)
+    |> Enum.into(%{})
   end
 end

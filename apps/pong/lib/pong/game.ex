@@ -14,8 +14,6 @@ defmodule Pong.Game do
     Paddle
   }
 
-  import Pong.Config, only: [config!: 2]
-
   @type t :: %__MODULE__{}
   @type player_ref :: :left | :right
 
