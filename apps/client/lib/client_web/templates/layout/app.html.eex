@@ -9,7 +9,6 @@
 
     <title>Hello Client!</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/assets/index.css") %>">
-    <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet" />
   </head>
 
   <body>
