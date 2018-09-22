@@ -27,8 +27,8 @@ defmodule Pong.Game.Paddle do
 
     start_x =
       case Keyword.get(args, :relative_to) do
-        nil -> margin + width / 2
-        offset -> offset - margin - width / 2
+        nil -> margin
+        offset -> offset - margin
       end
 
     %__MODULE__{

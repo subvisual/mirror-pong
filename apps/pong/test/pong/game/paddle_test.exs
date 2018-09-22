@@ -10,13 +10,13 @@ defmodule Pong.Game.PaddleTest do
     test "places the x coordinate according to the margin" do
       paddle = Paddle.new(y: 500)
 
-      assert paddle.x == 35
+      assert paddle.x == 30
     end
 
     test "places the x coordinate relative backwards to an offset" do
       paddle = Paddle.new(y: 500, relative_to: 1000)
 
-      assert paddle.x == 965
+      assert paddle.x == 970
     end
   end
 

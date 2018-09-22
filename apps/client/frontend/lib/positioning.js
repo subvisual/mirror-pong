@@ -8,14 +8,21 @@ const calcRatio = (dimensions, board) => {
   };
 };
 
-const repositionPaddle = (dimensions, ratios, paddle) => {
+const repositionPaddle = (
+  dimensions,
+  ratios,
+  paddle,
+  relativeToFullWidth = false
+) => {
   const { height } = dimensions;
   const { widthRatio, heightRatio } = ratios;
 
   const paddleHeight = paddle.height * heightRatio;
   const paddleWidth = paddle.width * widthRatio;
-  const paddleX = paddle.x * widthRatio - paddleWidth / 2;
-  const paddleY = height - (paddle.y * heightRatio - paddleHeight / 2);
+  const paddleY = height - paddle.y * heightRatio;
+  const paddleX = relativeToFullWidth
+    ? paddle.x * widthRatio
+    : paddle.x * widthRatio - paddleWidth;
 
   return {
     height: paddleHeight,
@@ -55,7 +62,8 @@ const repositionGame = ({ dimensions, game }) => {
   const repositionedPaddleRight = repositionPaddle(
     dimensions,
     ratios,
-    paddleRight
+    paddleRight,
+    true
   );
 
   const repositionedBall = repositionBall(dimensions, ratios, ball);
