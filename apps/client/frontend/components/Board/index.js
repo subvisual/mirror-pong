@@ -8,15 +8,19 @@ import Ball from '../Ball';
 import Paddle from '../Paddle';
 import RetroText from '../RetroText';
 
+import positioning from '../../lib/positioning';
+
 import './index.css';
 
 export default class Board extends Component {
   /* eslint react/no-unused-state: 0 */
   state = {
-    ball: null,
-    board: null,
-    paddle_left: null,
-    paddle_right: null,
+    game: {
+      ball: null,
+      board: null,
+      paddle_left: null,
+      paddle_right: null,
+    },
     loading: true,
   };
   /* eslint react/no-unused-state: 1 */
@@ -47,23 +51,12 @@ export default class Board extends Component {
     this.leaveChannel();
   }
 
-  updateState = data => {
-    const {
-      board: { width: boardWidth, height: boardHeight },
-    } = data;
-    const { width, height } = this.props;
-    const widthRatio = width / boardWidth;
-    const heightRatio = height / boardHeight;
-
-    this.setState({ ...data, widthRatio, heightRatio });
-  };
-
   joinChannel = () => {
     this.channel
       .join()
       .receive('ok', data => {
         console.log('Joined successfully', data); // eslint-disable-line
-        this.updateState({ ...data, loading: false });
+        this.setState({ game: { ...data }, loading: false });
         this.subscribeToData();
       })
       .receive('error', resp => {
@@ -86,45 +79,8 @@ export default class Board extends Component {
 
   subscribeToData = () => {
     this.channel.on('data', data => {
-      this.updateState(data);
+      this.setState({ game: { ...data } });
     });
-  };
-
-  convertPaddle = paddle => {
-    const { x, y, width: paddleWidth, height: paddleHeight } = paddle;
-    const { widthRatio, heightRatio } = this.state;
-    const { height } = this.props;
-
-    const convertedHeight = paddleHeight * heightRatio;
-    const convertedWidth = paddleWidth * widthRatio;
-    const convertedX = x * widthRatio - convertedWidth / 2;
-    const convertedY = height - (y * heightRatio - convertedHeight / 2);
-
-    return {
-      x: convertedX,
-      y: convertedY,
-      width: convertedWidth,
-      height: convertedHeight,
-    };
-  };
-
-  convertBall = () => {
-    const {
-      widthRatio,
-      heightRatio,
-      ball: { x, y, radius },
-    } = this.state;
-    const { height } = this.props;
-
-    const convertedRadius = widthRatio * radius;
-    const convertedX = widthRatio * x;
-    const convertedY = height - heightRatio * y;
-
-    return {
-      x: convertedX,
-      y: convertedY,
-      radius: convertedRadius,
-    };
   };
 
   render() {
@@ -132,13 +88,17 @@ export default class Board extends Component {
 
     if (loading) return <div styleName="root" />;
 
-    const { paddle_left: paddleLeft, paddle_right: paddleRight } = this.state;
-
-    const convertedPaddleLeft = this.convertPaddle(paddleLeft);
-    const convertedPaddleRight = this.convertPaddle(paddleRight);
-    const convertedBall = this.convertBall();
-
+    const { game } = this.state;
     const { width, height } = this.props;
+
+    const {
+      paddle_left: paddleLeft,
+      paddle_right: paddleRight,
+      ball,
+    } = positioning.repositionGame({
+      dimensions: { width, height },
+      game: game,
+    });
 
     return (
       <Stage width={width} height={height} styleName="root">
@@ -151,11 +111,11 @@ export default class Board extends Component {
             opacity={0.7}
           />
 
-          <Paddle {...convertedPaddleLeft} />
+          <Paddle {...paddleLeft} />
 
-          <Paddle {...convertedPaddleRight} />
+          <Paddle {...paddleRight} />
 
-          <Ball {...convertedBall} />
+          <Ball {...ball} />
         </Layer>
       </Stage>
     );
