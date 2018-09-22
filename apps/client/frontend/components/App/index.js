@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import Board from '../Board';
+import BoardRoom from '../BoardRoom';
 import PlayRoom from '../PlayRoom';
 import Lobby from '../Lobby';
 
@@ -14,7 +14,7 @@ export default class App extends Component {
         <div>
           <Route exact path="/" component={Lobby} />
           <Route exact path="/play" component={PlayRoom} />
-          <Route exact path="/board" component={Board} />
+          <Route exact path="/board" component={BoardRoom} />
         </div>
       </Router>
     );
