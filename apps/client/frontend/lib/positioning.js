@@ -69,10 +69,10 @@ const repositionGame = ({ dimensions, game }) => {
   const repositionedBall = repositionBall(dimensions, ratios, ball);
 
   return {
-    board,
+    ...game,
     ball: repositionedBall,
-    paddle_left: repositionedPaddleLeft,
-    paddle_right: repositionedPaddleRight,
+    paddle_left: { ...paddleLeft, ...repositionedPaddleLeft },
+    paddle_right: { ...paddleRight, ...repositionedPaddleRight },
   };
 };
 

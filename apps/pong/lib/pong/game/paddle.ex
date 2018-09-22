@@ -4,7 +4,8 @@ defmodule Pong.Game.Paddle do
     :height,
     :x,
     :y,
-    :speed
+    :speed,
+    :fill
   ]
 
   import Pong.Config, only: [config!: 2]
@@ -31,11 +32,14 @@ defmodule Pong.Game.Paddle do
         offset -> offset - margin
       end
 
+    fill = Keyword.get(args, :fill, random_fill())
+
     %__MODULE__{
       width: width,
       height: height,
       x: start_x,
       y: start_y,
+      fill: fill,
       speed: @default_speed
     }
   end
@@ -46,6 +50,16 @@ defmodule Pong.Game.Paddle do
     |> apply_vector(direction)
     |> prevent_overflow(board)
   end
+
+  @spec random_fills(integer()) :: String.t()
+  def random_fills(n) do
+    config!(__MODULE__, :fills)
+    |> Enum.shuffle()
+    |> Enum.take(n)
+  end
+
+  @spec random_fill :: String.t()
+  def random_fill, do: random_fills(1) |> List.first()
 
   defp apply_vector(%{y: y} = paddle, :up) do
     %{paddle | y: y + @default_speed}

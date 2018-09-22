@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import _ from 'lodash';
-import Konva from 'konva';
 import { Rect } from 'react-konva';
 
 export default class Paddle extends Component {
@@ -17,20 +16,13 @@ export default class Paddle extends Component {
       PropTypes.number.isRequired,
       PropTypes.func.isRequired,
     ]).isRequired,
-    fill: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+    fill: PropTypes.string.isRequired,
   };
 
   static defaultProps = {
     width: 20,
     height: 200,
-    fill: Konva.Util.getRandomColor,
   };
-
-  constructor(props) {
-    super(props);
-
-    this.fill = this.evalFill();
-  }
 
   evalCoordinate(coord) {
     const { width, height } = this.props;
@@ -42,18 +34,8 @@ export default class Paddle extends Component {
     return coord;
   }
 
-  evalFill() {
-    const { fill } = this.props;
-
-    if (_.isFunction(fill)) {
-      return fill();
-    }
-
-    return fill;
-  }
-
   render() {
-    const { width, height, x, y } = this.props;
+    const { width, height, x, y, fill } = this.props;
 
     return (
       <Rect
@@ -61,7 +43,7 @@ export default class Paddle extends Component {
         y={this.evalCoordinate(y) - height / 2}
         width={width}
         height={height}
-        fill={this.fill}
+        fill={fill}
       />
     );
   }

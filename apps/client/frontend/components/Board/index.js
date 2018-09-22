@@ -97,7 +97,7 @@ export default class Board extends Component {
       ball,
     } = positioning.repositionGame({
       dimensions: { width, height },
-      game: game,
+      game,
     });
 
     return (

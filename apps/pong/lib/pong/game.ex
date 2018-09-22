@@ -21,11 +21,18 @@ defmodule Pong.Game do
   def new do
     board = Board.new()
 
+    [left_paddle_fill, right_paddle_fill] = Paddle.random_fills(2)
+
     %__MODULE__{
       ball: Ball.new(),
       board: board,
-      paddle_left: Paddle.new(y: board.height / 2),
-      paddle_right: Paddle.new(y: board.height / 2, relative_to: board.width)
+      paddle_left: Paddle.new(y: board.height / 2, fill: left_paddle_fill),
+      paddle_right:
+        Paddle.new(
+          y: board.height / 2,
+          relative_to: board.width,
+          fill: right_paddle_fill
+        )
     }
   end
 

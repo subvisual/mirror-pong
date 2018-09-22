@@ -14,4 +14,20 @@ config :pong, Pong.Game.Ball,
 config :pong, Pong.Game.Paddle,
   width: 10,
   height: 100,
-  margin: 30
+  margin: 30,
+  fills: [
+    # anakiwa (cyan)
+    "#8BE9FD",
+    # screamin green
+    "#50FA7B",
+    # koromiko (orange)
+    "#FFB86C",
+    # hot pink
+    "#FF79C6",
+    # perfume (purple)
+    "#BD93F9",
+    # persimmon (red)
+    "#FF5555",
+    # honeysuckle (yellow)
+    "#F1FA8C"
+  ]
