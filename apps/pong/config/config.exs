@@ -7,8 +7,8 @@ config :pong, Pong.Game.Board,
   height: 1000
 
 config :pong, Pong.Game.Ball,
-  start_x: 250,
-  start_y: 250,
+  start_x: 500,
+  start_y: 500,
   radius: 5
 
 config :pong, Pong.Game.Paddle,

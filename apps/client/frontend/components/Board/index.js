@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Stage, Layer } from 'react-konva';
 import { Socket } from 'phoenix';
 
+import Ball from '../Ball';
 import Paddle from '../Paddle';
 import RetroText from '../RetroText';
 
@@ -46,12 +47,23 @@ export default class Board extends Component {
     this.leaveChannel();
   }
 
+  updateState = data => {
+    const {
+      board: { width: boardWidth, height: boardHeight },
+    } = data;
+    const { width, height } = this.props;
+    const widthRatio = width / boardWidth;
+    const heightRatio = height / boardHeight;
+
+    this.setState({ ...data, widthRatio, heightRatio });
+  };
+
   joinChannel = () => {
     this.channel
       .join()
       .receive('ok', data => {
         console.log('Joined successfully', data); // eslint-disable-line
-        this.setState({ ...data, loading: false });
+        this.updateState({ ...data, loading: false });
         this.subscribeToData();
       })
       .receive('error', resp => {
@@ -74,19 +86,14 @@ export default class Board extends Component {
 
   subscribeToData = () => {
     this.channel.on('data', data => {
-      this.setState(data);
-      console.log(data);
+      this.updateState(data);
     });
   };
 
   convertPaddle = paddle => {
     const { x, y, width: paddleWidth, height: paddleHeight } = paddle;
-    const {
-      board: { width: boardWidth, height: boardHeight },
-    } = this.state;
-    const { width, height } = this.props;
-    const widthRatio = width / boardWidth;
-    const heightRatio = height / boardHeight;
+    const { widthRatio, heightRatio } = this.state;
+    const { height } = this.props;
 
     const convertedHeight = paddleHeight * heightRatio;
     const convertedWidth = paddleWidth * widthRatio;
@@ -101,6 +108,25 @@ export default class Board extends Component {
     };
   };
 
+  convertBall = () => {
+    const {
+      widthRatio,
+      heightRatio,
+      ball: { x, y, radius },
+    } = this.state;
+    const { height } = this.props;
+
+    const convertedRadius = widthRatio * radius;
+    const convertedX = widthRatio * x;
+    const convertedY = height - heightRatio * y;
+
+    return {
+      x: convertedX,
+      y: convertedY,
+      radius: convertedRadius,
+    };
+  };
+
   render() {
     const { loading } = this.state;
 
@@ -110,6 +136,7 @@ export default class Board extends Component {
 
     const convertedPaddleLeft = this.convertPaddle(paddleLeft);
     const convertedPaddleRight = this.convertPaddle(paddleRight);
+    const convertedBall = this.convertBall();
 
     const { width, height } = this.props;
 
@@ -127,6 +154,8 @@ export default class Board extends Component {
           <Paddle {...convertedPaddleLeft} />
 
           <Paddle {...convertedPaddleRight} />
+
+          <Ball {...convertedBall} />
         </Layer>
       </Stage>
     );
