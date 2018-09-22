@@ -19,6 +19,10 @@ defmodule Pong do
     GenServer.call(__MODULE__, {:leave, player_id})
   end
 
+  def restart do
+    GenServer.call(__MODULE__, :restart)
+  end
+
   def game_state do
     GenServer.call(__MODULE__, :game_state)
   end
@@ -32,15 +36,7 @@ defmodule Pong do
   end
 
   def init(:ok) do
-    state = %{
-      game: Game.new(),
-      fps: config(Pong, :fps, @fps),
-      player_left: nil,
-      player_right: nil,
-      subscriptions: []
-    }
-
-    {:ok, state}
+    {:ok, default_state()}
   end
 
   def handle_cast({:move, player, direction}, %{game: game} = state) do
@@ -61,8 +57,8 @@ defmodule Pong do
       {:error, :game_full} = error ->
         {:reply, error, state}
 
-      {:ok, player_id, new_state} ->
-        {:reply, {:ok, player_id}, new_state}
+      {:ok, player_data, new_state} ->
+        {:reply, {:ok, player_data}, new_state}
     end
   end
 
@@ -74,11 +70,31 @@ defmodule Pong do
     {:reply, state.game, state}
   end
 
-  defp add_player(%{player_left: nil} = state),
-    do: {:ok, :left, %{state | player_left: true}}
+  def handle_call(:restart, _from, state) do
+    new_state = %{default_state() | subscriptions: state.subscriptions}
 
-  defp add_player(%{player_right: nil} = state),
-    do: {:ok, :right, %{state | player_right: true}}
+    broadcast(new_state)
+
+    {:reply, new_state.game, new_state}
+  end
+
+  defp add_player(%{player_left: nil} = state) do
+    player_data = %{
+      player_id: :left,
+      paddle_color: state.game.paddle_left.fill
+    }
+
+    {:ok, player_data, %{state | player_left: true}}
+  end
+
+  defp add_player(%{player_right: nil} = state) do
+    player_data = %{
+      player_id: :right,
+      paddle_color: state.game.paddle_right.fill
+    }
+
+    {:ok, player_data, %{state | player_right: true}}
+  end
 
   defp add_player(_), do: {:error, :game_full}
 
@@ -90,5 +106,15 @@ defmodule Pong do
     for sub <- subscriptions do
       sub.(game)
     end
+  end
+
+  defp default_state do
+    %{
+      game: Game.new(),
+      fps: config(Pong, :fps, @fps),
+      player_left: nil,
+      player_right: nil,
+      subscriptions: []
+    }
   end
 end

@@ -1,10 +1,10 @@
 .arrow {
   padding: var(--size-20);
 
-  border: 10px solid var(--gallery);
+  border: 10px solid var(--charcoal);
   user-select: none;
 
-  color: var(--gallery);
+  color: var(--charcoal);
   cursor: pointer;
 
   font-family: var(--font-family-monospace);

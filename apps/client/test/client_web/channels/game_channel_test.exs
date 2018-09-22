@@ -5,6 +5,8 @@ defmodule ClientWeb.Channels.GameChannelTest do
 
   import Mock
 
+  @default_player_data %{player_id: :left, paddle_color: "black"}
+
   describe "join game:board" do
     test "returns the current game state" do
       Pong.start_link([])
@@ -16,9 +18,9 @@ defmodule ClientWeb.Channels.GameChannelTest do
   end
 
   describe "join game:play" do
-    test "returns and assigns a player id if there are spots available" do
-      with_mock Pong, join: fn -> {:ok, :left} end do
-        assert {:ok, %{player_id: :left}, socket} =
+    test "returns and assigns a player id and paddle color if there are spots available" do
+      with_mock Pong, join: fn -> {:ok, @default_player_data} end do
+        assert {:ok, %{player_id: :left, paddle_color: _}, socket} =
                  socket()
                  |> subscribe_and_join(GameChannel, "game:play")
 
@@ -37,7 +39,7 @@ defmodule ClientWeb.Channels.GameChannelTest do
   describe "terminate" do
     test "leaves the game if there is a player assigned" do
       with_mock Pong,
-        join: fn -> {:ok, :left} end,
+        join: fn -> {:ok, @default_player_data} end,
         leave: fn _ -> :ok end do
         {:ok, _, socket} =
           socket()
@@ -54,7 +56,7 @@ defmodule ClientWeb.Channels.GameChannelTest do
   describe "handling of player:move" do
     test "ignores if the direction is invalid" do
       with_mock Pong,
-        join: fn -> {:ok, :left} end,
+        join: fn -> {:ok, @default_player_data} end,
         move: fn _, _ -> :ok end do
         {:ok, _, socket} =
           socket()
@@ -85,7 +87,7 @@ defmodule ClientWeb.Channels.GameChannelTest do
       test_pid = self()
 
       with_mock Pong,
-        join: fn -> {:ok, :left} end,
+        join: fn -> {:ok, @default_player_data} end,
         move: fn player, direction -> send test_pid, {player, direction} end do
         {:ok, _, socket} =
           socket()

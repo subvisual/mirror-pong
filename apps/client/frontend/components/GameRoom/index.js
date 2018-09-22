@@ -9,6 +9,7 @@ export default class GameRoom extends Component {
   state = {
     loading: true,
     status: null,
+    paddle_color: null,
   };
 
   constructor(props) {
@@ -33,7 +34,7 @@ export default class GameRoom extends Component {
       .join()
       .receive('ok', resp => {
         console.log('Joined successfully', resp); // eslint-disable-line
-        this.setState({ loading: false, status: 'joined' });
+        this.setState({ loading: false, status: 'joined', ...resp });
       })
       .receive('error', resp => {
         console.log('Unable to join', resp); // eslint-disable-line
@@ -67,8 +68,10 @@ export default class GameRoom extends Component {
 
     if (loading) return <div styleName="root" />;
 
+    const { paddle_color: backgroundColor } = this.state;
+
     return (
-      <div styleName="root">
+      <div styleName="root" style={{ backgroundColor }}>
         <div styleName="center">{this.renderInnerContent()}</div>
       </div>
     );

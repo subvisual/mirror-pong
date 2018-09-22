@@ -87,12 +87,15 @@ defmodule PongTest do
       assert new_state[:player_right]
     end
 
-    test "returns the player tag" do
+    test "returns the player data" do
       state = build_pong_state()
 
-      {:reply, reply, _} = Pong.handle_call(:join, self(), state)
+      {:reply, {:ok, player_data}, _} = Pong.handle_call(:join, self(), state)
 
-      assert {:ok, :left} == reply
+      assert %{
+               player_id: :left,
+               paddle_color: _
+             } = player_data
     end
   end
 
@@ -120,6 +123,38 @@ defmodule PongTest do
 
       assert {:reply, ^game, ^state} =
                Pong.handle_call(:game_state, self(), state)
+    end
+  end
+
+  describe "handle_call/3 for :restart messages" do
+    test "resets the state but keeps the subscriptions" do
+      subscriptions = [fn data -> send self(), data end]
+
+      state =
+        build_pong_state(
+          player_left: true,
+          player_right: true,
+          subscriptions: subscriptions
+        )
+
+      {:reply, _, new_state} = Pong.handle_call(:restart, self(), state)
+
+      assert %{
+               game: _,
+               fps: _,
+               player_left: nil,
+               player_right: nil,
+               subscriptions: ^subscriptions
+             } = new_state
+    end
+
+    test "broadcasts the game restart to subscriptions" do
+      subscriptions = [fn data -> send self(), data end]
+      state = build_pong_state(subscriptions: subscriptions)
+
+      Pong.handle_call(:restart, self(), state)
+
+      assert_receive %Pong.Game{}
     end
   end
 

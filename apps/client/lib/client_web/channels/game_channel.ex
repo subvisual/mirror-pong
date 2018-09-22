@@ -13,8 +13,8 @@ defmodule ClientWeb.Channels.GameChannel do
 
   def join("game:play", _params, socket) do
     case Pong.join() do
-      {:ok, player_id} ->
-        {:ok, %{player_id: player_id}, assign(socket, :player_id, player_id)}
+      {:ok, %{player_id: player_id} = player_data} ->
+        {:ok, player_data, assign(socket, :player_id, player_id)}
 
       {:error, :game_full} ->
         {:error, %{reason: "game full"}}
