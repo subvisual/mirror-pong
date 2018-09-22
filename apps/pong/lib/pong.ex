@@ -36,7 +36,9 @@ defmodule Pong do
   end
 
   def init(:ok) do
-    {:ok, default_state()}
+    state = default_state()
+
+    {:ok, state}
   end
 
   def handle_cast({:move, player, direction}, %{game: game} = state) do
@@ -54,11 +56,13 @@ defmodule Pong do
 
   def handle_call(:join, _from, state) do
     case add_player(state) do
+      {:ok, player_data, new_state} ->
+        if players_ready?(new_state), do: start_game(new_state)
+
+        {:reply, {:ok, player_data}, new_state}
+
       {:error, :game_full} = error ->
         {:reply, error, state}
-
-      {:ok, player_data, new_state} ->
-        {:reply, {:ok, player_data}, new_state}
     end
   end
 
@@ -76,6 +80,16 @@ defmodule Pong do
     broadcast(new_state)
 
     {:reply, new_state.game, new_state}
+  end
+
+  def handle_info(:work, %{game: game} = state) do
+    new_state = %{state | game: Game.apply(game)}
+
+    broadcast(new_state)
+
+    schedule_work(new_state.period)
+
+    {:noreply, new_state}
   end
 
   defp add_player(%{player_left: nil} = state) do
@@ -109,12 +123,26 @@ defmodule Pong do
   end
 
   defp default_state do
+    fps = config(Pong, :fps, @fps)
+
     %{
       game: Game.new(),
-      fps: config(Pong, :fps, @fps),
+      fps: fps,
+      period: Kernel.trunc(1 / fps * 1_000),
       player_left: nil,
       player_right: nil,
       subscriptions: []
     }
+  end
+
+  defp schedule_work(period) do
+    Process.send_after(self(), :work, period)
+  end
+
+  defp players_ready?(state), do: state.player_left && state.player_right
+
+  defp start_game(state) do
+    # Any logic for game scheduling comes here
+    schedule_work(state.period)
   end
 end

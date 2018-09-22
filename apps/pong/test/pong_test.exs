@@ -12,6 +12,7 @@ defmodule PongTest do
       assert %{
                game: _,
                fps: _,
+               period: _,
                player_left: nil,
                player_right: nil,
                subscriptions: []
@@ -85,6 +86,22 @@ defmodule PongTest do
       {:reply, _, new_state} = Pong.handle_call(:join, self(), state)
 
       assert new_state[:player_right]
+    end
+
+    test "schedules work if all players are ready" do
+      state = build_pong_state(player_left: true, period: 1)
+
+      {:reply, _, _} = Pong.handle_call(:join, self(), state)
+
+      assert_receive :work, 100
+    end
+
+    test "doesn't return schedule work when a player is missing" do
+      state = build_pong_state(period: 1)
+
+      {:reply, _, _} = Pong.handle_call(:join, self(), state)
+
+      refute_receive :work, 100
     end
 
     test "returns the player data" do
@@ -162,6 +179,7 @@ defmodule PongTest do
     [
       game: build(:game),
       fps: 60,
+      period: Kernel.trunc(1 / 60 * 1_000),
       player_left: nil,
       player_right: nil,
       subscriptions: []
