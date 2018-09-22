@@ -70,6 +70,11 @@ defmodule Pong.Game.Paddle do
   end
 
   defp prevent_overflow(paddle, board) do
-    %{paddle | y: min(paddle.y, board.height - paddle.height / 2)}
+    clamped_y =
+      paddle.y
+      |> min(board.height - paddle.height / 2)
+      |> max(paddle.height / 2)
+
+    %{paddle | y: clamped_y}
   end
 end

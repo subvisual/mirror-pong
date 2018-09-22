@@ -39,14 +39,24 @@ defmodule Pong.Game.PaddleTest do
       assert y < paddle.y
     end
 
-    test "prevents the paddle from overflowing off the game board" do
+    test "prevents the paddle from overflowing off the top of the game board" do
       board = build(:board)
-      # position the paddle center 1 point below the board edge
+      # position the paddle center 1 unit below the board edge
       paddle = build(:paddle, height: 100, y: board.height - 51)
 
       %{y: y} = Paddle.move(paddle, :up, board)
 
       assert y == board.height - 50
+    end
+
+    test "prevents the paddle from overflowing off the bottom of the game board" do
+      board = build(:board)
+      # position the paddle center 1 unit above the board edge
+      paddle = build(:paddle, height: 100, y: 51)
+
+      %{y: y} = Paddle.move(paddle, :down, board)
+
+      assert y == 50
     end
   end
 end
