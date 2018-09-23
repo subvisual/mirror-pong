@@ -5,7 +5,9 @@ defmodule MirrorPong.MixProject do
     [
       apps_path: "apps",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      deps_path: deps_path(),
+      build_path: build_path()
     ]
   end
 
@@ -19,4 +21,10 @@ defmodule MirrorPong.MixProject do
       {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false}
     ]
   end
+
+  # CI caching issues should definitely not be part of the mix config.
+  # However there is an issue with rebar and symlinks which causes cowboy to
+  # crash when compiling.  See: https://github.com/erlang/rebar3/issues/1708
+  defp deps_path, do: System.get_env("DEPS_PATH") || "deps"
+  defp build_path, do: System.get_env("BUILD_PATH") || "_build"
 end
