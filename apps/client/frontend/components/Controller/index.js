@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ControlArrow from '../ControlArrow';
 
 import './index.css';
 
@@ -10,53 +11,13 @@ export default class Controller extends Component {
     }).isRequired,
   };
 
-  componentWillUnmount() {
-    this.clearMouse();
-  }
-
-  handleUp = () => {
-    const { channel } = this.props;
-
-    this.mouseInterval = setInterval(
-      () => channel.push('player:move', { direction: 'up' }),
-      15
-    );
-  };
-
-  handleDown = () => {
-    const { channel } = this.props;
-
-    this.mouseInterval = setInterval(
-      () => channel.push('player:move', { direction: 'down' }),
-      15
-    );
-  };
-
-  clearMouse = () => {
-    clearInterval(this.mouseInterval);
-  };
-
   render() {
+    const { channel } = this.props;
+
     return (
-      <div>
-        <div
-          styleName="arrow"
-          onMouseDown={this.handleUp}
-          onMouseUp={this.clearMouse}
-          onMouseLeave={this.clearMouse}
-          role="presentation"
-        >
-          ↑
-        </div>
-        <div
-          styleName="arrow"
-          onMouseDown={this.handleDown}
-          onMouseUp={this.clearMouse}
-          onMouseLeave={this.clearMouse}
-          role="presentation"
-        >
-          ↓
-        </div>
+      <div styleName="root">
+        <ControlArrow channel={channel} direction="up" />
+        <ControlArrow channel={channel} direction="down" />
       </div>
     );
   }

@@ -1,0 +1,19 @@
+.root {
+  padding: var(--size-20);
+
+  border: 10px solid var(--gallery);
+  user-select: none;
+
+  color: var(--gallery);
+  cursor: pointer;
+
+  font-family: var(--font-family-monospace);
+  font-size: var(--size-112);
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+.selected {
+  border: 10px solid var(--charcoal);
+  color: var(--charcoal);
+}

@@ -11,6 +11,7 @@
     "lint": "eslint frontend/**/*.js* && stylelint frontend/components/**/*.css"
   },
   "dependencies": {
+    "classnames": "^2.2.6",
     "konva": "^2.3.0",
     "lodash": "^4.17.10",
     "parcel-bundler": "^1.9.7",
