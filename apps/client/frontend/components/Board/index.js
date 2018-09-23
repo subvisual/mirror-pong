@@ -84,7 +84,6 @@ export default class Board extends Component {
   };
 
   render() {
-    console.log(this.state)
     const { loading } = this.state;
 
     if (loading) return <div styleName="root" />;
