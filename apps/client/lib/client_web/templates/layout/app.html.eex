@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Hello Client!</title>
+    <title>Mirror Pong</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/assets/index.css") %>">
   </head>
 
