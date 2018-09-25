@@ -8,7 +8,7 @@
   "scripts": {
     "deploy": "webpack --mode production",
     "watch": "webpack --mode development --watch --hot",
-    "lint": "eslint frontend/**/*.js* && stylelint frontend/components/**/*.css"
+    "lint": "eslint frontend && stylelint frontend/components/**/*.css"
   },
   "dependencies": {
     "classnames": "^2.2.6",

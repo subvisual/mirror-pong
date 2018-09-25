@@ -38,7 +38,7 @@ defmodule PongTest do
 
       Pong.handle_cast({:move, :left, :up}, state)
 
-      assert_received %Pong.Game{}
+      assert_received %{game: %Pong.Game{}}
     end
 
     test "returns the state with an updated game" do
@@ -136,7 +136,8 @@ defmodule PongTest do
 
   describe "handle_call/3 for :game_state messages" do
     test "returns the game state" do
-      %{game: game} = state = build_pong_state()
+      state = build_pong_state()
+      game = %{game: state.game, players: %{left: nil, right: nil}}
 
       assert {:reply, ^game, ^state} =
                Pong.handle_call(:game_state, self(), state)
@@ -171,7 +172,7 @@ defmodule PongTest do
 
       Pong.handle_call(:restart, self(), state)
 
-      assert_receive %Pong.Game{}
+      assert_receive %{game: %Pong.Game{}}
     end
   end
 

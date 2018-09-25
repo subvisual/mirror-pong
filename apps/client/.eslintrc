@@ -1,6 +1,11 @@
 {
   "plugins": ["jsx-a11y"],
   "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "legacyDecorators": true
+    }
+  },
   "extends": ["airbnb", "prettier", "plugin:jsx-a11y/recommended"],
   "rules": {
     "no-plusplus": 0,
