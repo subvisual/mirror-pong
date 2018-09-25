@@ -2,9 +2,6 @@
   "modules": true,
   "plugins": {
     "autoprefixer": {},
-    "precss": {},
-    "postcss-modules": {
-      "generateScopedName": "[path]__[name]__[local]__[hash:base64:5]"
-    }
+    "precss": {}
   }
 }
