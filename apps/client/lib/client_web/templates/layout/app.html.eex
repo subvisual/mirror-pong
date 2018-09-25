@@ -8,11 +8,11 @@
     <meta name="author" content="">
 
     <title>Mirror Pong</title>
-    <link rel="stylesheet" href="<%= static_path(@conn, "/assets/index.css") %>">
+    <link rel="stylesheet" href="<%= static_path(@conn, "/assets/main.css") %>">
   </head>
 
   <body>
     <%= render @view_module, @view_template, assigns %>
-    <script src="<%= static_path(@conn, "/assets/index.js") %>"></script>
+    <script src="<%= static_path(@conn, "/assets/main.js") %>"></script>
   </body>
 </html>
