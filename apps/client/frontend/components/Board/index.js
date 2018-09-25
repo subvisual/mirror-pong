@@ -9,6 +9,7 @@ import RetroText from '../RetroText';
 import resizable from '../Resizable';
 
 import positioning from '../../lib/positioning';
+import GameAnimator from '../../lib/gameAnimator';
 
 import './index.css';
 
@@ -24,6 +25,9 @@ const paddlePropTypes = PropTypes.shape({
 @resizable
 export default class Board extends Component {
   static propTypes = {
+    channel: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+    }).isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     paddleMargin: PropTypes.number,
@@ -49,21 +53,49 @@ export default class Board extends Component {
     paddleMargin: 50,
   };
 
+  componentDidMount() {
+    this.gameAnimator = new GameAnimator({
+      layer: this.layerRef,
+      paddleLeft: this.paddleLeftRef,
+      paddleRight: this.paddleRightRef,
+      ball: this.ballRef,
+    });
+
+    const { channel, width, height } = this.props;
+
+    channel.on('data', data => {
+      const newPositions = positioning.repositionGame({
+        dimensions: { width, height },
+        game: data.game,
+      });
+
+      this.gameAnimator.setPositions(newPositions);
+    });
+
+    this.gameAnimator.start();
+  }
+
+  componentWillUnmount() {
+    this.gameAnimator.stop();
+  }
+
+  shouldComponentUpdate = () => false;
+
   render() {
     const { game, width, height } = this.props;
 
-    const {
-      paddle_left: paddleLeft,
-      paddle_right: paddleRight,
-      ball,
-    } = positioning.repositionGame({
+    const { paddleLeft, paddleRight, ball } = positioning.repositionGame({
       dimensions: { width, height },
       game,
     });
 
     return (
       <Stage width={width} height={height} styleName="root">
-        <Layer>
+        <Layer
+          ref={ref => {
+            this.layerRef = ref;
+          }}
+        >
           <RetroText
             text="Mirror Conf"
             x={width / 2}
@@ -72,11 +104,26 @@ export default class Board extends Component {
             opacity={0.7}
           />
 
-          <Paddle {...paddleLeft} />
+          <Paddle
+            ref={ref => {
+              this.paddleLeftRef = ref && ref.paddleRef;
+            }}
+            {...paddleLeft}
+          />
 
-          <Paddle {...paddleRight} />
+          <Paddle
+            ref={ref => {
+              this.paddleRightRef = ref && ref.paddleRef;
+            }}
+            {...paddleRight}
+          />
 
-          <Ball {...ball} />
+          <Ball
+            ref={ref => {
+              this.ballRef = ref && ref.ballRef;
+            }}
+            {...ball}
+          />
         </Layer>
       </Stage>
     );

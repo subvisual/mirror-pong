@@ -86,6 +86,6 @@ export default class BoardRoom extends Component {
       return <Centered>Currently waiting for players!</Centered>;
     }
 
-    return <Board {...this.state} />;
+    return <Board channel={this.channel} {...this.state} />;
   }
 }

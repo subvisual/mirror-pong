@@ -3555,7 +3555,7 @@ known-css-properties@^0.6.0:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/known-css-properties/-/known-css-properties-0.6.1.tgz#31b5123ad03d8d1a3f36bd4155459c981173478b"
 
-konva@^2.3.0:
+konva@^2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/konva/-/konva-2.4.0.tgz#3df5925ba69439117bf6efc0907517b0b0107e21"
 
