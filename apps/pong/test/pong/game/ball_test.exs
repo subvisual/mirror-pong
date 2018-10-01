@@ -51,12 +51,14 @@ defmodule Pong.Game.BallTest do
     end
   end
 
-  describe "move/2" do
+  describe "move/4" do
     test "updates the coordinates using the vector and the speed" do
       board = build(:board)
       ball = build(:ball, vector_x: 1, vector_y: -1, speed: 2)
+      paddle_left = build(:paddle)
+      paddle_right = build(:paddle)
 
-      %{x: x, y: y} = Ball.move(ball, board)
+      %{x: x, y: y} = Ball.move(ball, board, paddle_left, paddle_right)
 
       assert x == ball.x + 2
       assert y == ball.y - 2
@@ -64,6 +66,8 @@ defmodule Pong.Game.BallTest do
 
     test "prevents the ball from overflowing off the game board" do
       board = build(:board)
+      paddle_left = build(:paddle)
+      paddle_right = build(:paddle)
       # all balls are 1 unit away from their respective wall
       top_wall_ball =
         build(:ball, radius: 5, y: board.height - 6, vector_y: 1, speed: 10)
@@ -74,10 +78,17 @@ defmodule Pong.Game.BallTest do
       bottom_wall_ball = build(:ball, radius: 5, y: 6, vector_y: -1, speed: 10)
       left_wall_ball = build(:ball, radius: 5, x: 6, vector_x: -1, speed: 10)
 
-      %{y: top_wall_ball_y} = Ball.move(top_wall_ball, board)
-      %{x: right_wall_ball_x} = Ball.move(right_wall_ball, board)
-      %{y: bottom_wall_ball_y} = Ball.move(bottom_wall_ball, board)
-      %{x: left_wall_ball_x} = Ball.move(left_wall_ball, board)
+      %{y: top_wall_ball_y} =
+        Ball.move(top_wall_ball, board, paddle_left, paddle_right)
+
+      %{x: right_wall_ball_x} =
+        Ball.move(right_wall_ball, board, paddle_left, paddle_right)
+
+      %{y: bottom_wall_ball_y} =
+        Ball.move(bottom_wall_ball, board, paddle_left, paddle_right)
+
+      %{x: left_wall_ball_x} =
+        Ball.move(left_wall_ball, board, paddle_left, paddle_right)
 
       assert top_wall_ball_y == board.height - top_wall_ball.radius
       assert right_wall_ball_x == board.height - right_wall_ball.radius
@@ -87,6 +98,9 @@ defmodule Pong.Game.BallTest do
 
     test "updates the vector when colliding with the wall" do
       board = build(:board)
+      paddle_left = build(:paddle, x: 30, y: 0)
+      paddle_right = build(:paddle, x: 970, y: 0)
+
       # all balls are 1 unit away from their respective wall
       top_wall_ball =
         build(:ball, radius: 5, y: board.height - 6, vector_y: 1, speed: 10)
@@ -97,10 +111,17 @@ defmodule Pong.Game.BallTest do
       bottom_wall_ball = build(:ball, radius: 5, y: 6, vector_y: -1, speed: 10)
       left_wall_ball = build(:ball, radius: 5, x: 6, vector_x: -1, speed: 10)
 
-      %{vector_y: top_wall_vector_y} = Ball.move(top_wall_ball, board)
-      %{vector_x: right_wall_vector_x} = Ball.move(right_wall_ball, board)
-      %{vector_y: bottom_wall_vector_y} = Ball.move(bottom_wall_ball, board)
-      %{vector_x: left_wall_vector_x} = Ball.move(left_wall_ball, board)
+      %{vector_y: top_wall_vector_y} =
+        Ball.move(top_wall_ball, board, paddle_left, paddle_right)
+
+      %{vector_x: right_wall_vector_x} =
+        Ball.move(right_wall_ball, board, paddle_left, paddle_right)
+
+      %{vector_y: bottom_wall_vector_y} =
+        Ball.move(bottom_wall_ball, board, paddle_left, paddle_right)
+
+      %{vector_x: left_wall_vector_x} =
+        Ball.move(left_wall_ball, board, paddle_left, paddle_right)
 
       assert top_wall_vector_y == -top_wall_ball.vector_y
       assert right_wall_vector_x == -right_wall_ball.vector_x

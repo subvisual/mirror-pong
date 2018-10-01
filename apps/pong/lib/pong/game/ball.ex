@@ -36,11 +36,12 @@ defmodule Pong.Game.Ball do
     }
   end
 
-  @spec move(Ball.t(), Board.t()) :: Ball.t()
-  def move(ball, board) do
+  @spec move(Ball.t(), Board.t(), Paddle.t(), Paddle.t()) :: Ball.t()
+  def move(ball, board, paddle_left, paddle_right) do
     ball
     |> apply_vector()
-    |> apply_collisions(board)
+    |> apply_board_collision(board)
+    |> apply_paddle_collisions(paddle_left, paddle_right)
   end
 
   defp generate_random_vector do
@@ -74,7 +75,7 @@ defmodule Pong.Game.Ball do
     }
   end
 
-  defp apply_collisions(ball, board) do
+  defp apply_board_collision(ball, board) do
     cond do
       collided_top_wall?(ball, board) or collided_bottom_wall?(ball) ->
         ball
@@ -90,6 +91,30 @@ defmodule Pong.Game.Ball do
         ball
     end
   end
+
+  defp apply_paddle_collisions(ball, paddle_left, paddle_right) do
+    cond do
+      collided_left_paddle?(ball, paddle_left) or
+          collided_right_paddle?(ball, paddle_right) ->
+        ball
+        |> reverse_vector_component(:vector_x)
+
+      true ->
+        ball
+    end
+  end
+
+  defp collided_left_paddle?(ball, paddle_left),
+    do:
+      ball.x - ball.radius <= paddle_left.x and
+        ball.y <= paddle_left.y + paddle_left.height / 2 and
+        ball.y >= paddle_left.y - paddle_left.height / 2
+
+  defp collided_right_paddle?(ball, paddle_right),
+    do:
+      ball.x + ball.radius >= paddle_right.x and
+        ball.y <= paddle_right.y + paddle_right.height / 2 and
+        ball.y >= paddle_right.y - paddle_right.height / 2
 
   defp collided_top_wall?(ball, board),
     do: ball.y >= board.height - ball.radius

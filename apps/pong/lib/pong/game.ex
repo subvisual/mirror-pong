@@ -40,8 +40,15 @@ defmodule Pong.Game do
   Applies the ball movement to the game.
   """
   @spec apply(Game.t()) :: Game.t()
-  def apply(%{ball: ball, board: board} = game) do
-    %{game | ball: Ball.move(ball, board)}
+  def apply(
+        %{
+          ball: ball,
+          board: board,
+          paddle_left: paddle_left,
+          paddle_right: paddle_right
+        } = game
+      ) do
+    %{game | ball: Ball.move(ball, board, paddle_left, paddle_right)}
   end
 
   @doc """
