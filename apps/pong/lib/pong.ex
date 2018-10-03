@@ -124,8 +124,10 @@ defmodule Pong do
   defp remove_player(_, state), do: state
 
   defp broadcast(state) do
+    game_state = game_state(state)
+
     for sub <- state.subscriptions do
-      sub.(game_state(state))
+      sub.(game_state)
     end
   end
 
