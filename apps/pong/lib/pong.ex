@@ -71,7 +71,7 @@ defmodule Pong do
   end
 
   def handle_call(:game_state, _from, state) do
-    {:reply, state.game, state}
+    {:reply, game_state(state), state}
   end
 
   def handle_call(:restart, _from, state) do
@@ -90,6 +90,13 @@ defmodule Pong do
     schedule_work(new_state.period)
 
     {:noreply, new_state}
+  end
+
+  defp game_state(state) do
+    %{
+      game: state.game,
+      players: %{left: state.player_left, right: state.player_right}
+    }
   end
 
   defp add_player(%{player_left: nil} = state) do
@@ -116,9 +123,11 @@ defmodule Pong do
   defp remove_player(:right, state), do: %{state | player_right: nil}
   defp remove_player(_, state), do: state
 
-  defp broadcast(%{subscriptions: subscriptions, game: game}) do
-    for sub <- subscriptions do
-      sub.(game)
+  defp broadcast(state) do
+    game_state = game_state(state)
+
+    for sub <- state.subscriptions do
+      sub.(game_state)
     end
   end
 

@@ -11,7 +11,7 @@ defmodule ClientWeb.Channels.GameChannelTest do
     test "returns the current game state" do
       Pong.start_link([])
 
-      assert {:ok, %Pong.Game{}, _} =
+      assert {:ok, %{game: %Pong.Game{}, players: %{left: nil, right: nil}}, _} =
                socket()
                |> subscribe_and_join(GameChannel, "game:board")
     end

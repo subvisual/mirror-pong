@@ -1,0 +1,23 @@
+@import '../../settings.css';
+
+.root {
+  position: relative;
+
+  height: 100vh;
+
+  background-color: var(--charcoal);
+}
+
+.center {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  color: var(--gallery);
+
+  font-family: var(--font-family-monospace);
+  font-size: var(--size-112);
+
+  transform: translate(-50%, -50%);
+}

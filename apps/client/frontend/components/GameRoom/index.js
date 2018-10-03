@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-
 import { Socket } from 'phoenix';
 
-import './index.css';
 import Controller from '../Controller';
+
+import './index.css';
+import Centered from '../Centered';
 
 export default class GameRoom extends Component {
   state = {
@@ -71,9 +72,9 @@ export default class GameRoom extends Component {
     const { paddle_color: backgroundColor } = this.state;
 
     return (
-      <div styleName="root" style={{ backgroundColor }}>
-        <div styleName="center">{this.renderInnerContent()}</div>
-      </div>
+      <Centered style={{ backgroundColor }}>
+        {this.renderInnerContent()}
+      </Centered>
     );
   }
 }
