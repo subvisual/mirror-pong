@@ -19,6 +19,16 @@ export default class Ball extends Component {
   render() {
     const { radius, x, y, fill } = this.props;
 
-    return <Circle x={x} radius={radius} y={y} fill={fill} />;
+    return (
+      <Circle
+        ref={ref => {
+          this.ballRef = ref;
+        }}
+        x={x}
+        radius={radius}
+        y={y}
+        fill={fill}
+      />
+    );
   }
 }

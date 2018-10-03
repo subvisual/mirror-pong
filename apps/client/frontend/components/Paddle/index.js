@@ -7,14 +7,8 @@ export default class Paddle extends Component {
   static propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    x: PropTypes.oneOfType([
-      PropTypes.number.isRequired,
-      PropTypes.func.isRequired,
-    ]).isRequired,
-    y: PropTypes.oneOfType([
-      PropTypes.number.isRequired,
-      PropTypes.func.isRequired,
-    ]).isRequired,
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
     fill: PropTypes.string.isRequired,
   };
 
@@ -38,6 +32,9 @@ export default class Paddle extends Component {
 
     return (
       <Rect
+        ref={ref => {
+          this.paddleRef = ref;
+        }}
         x={this.evalCoordinate(x)}
         y={this.evalCoordinate(y) - height / 2}
         width={width}
