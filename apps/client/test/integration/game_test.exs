@@ -4,23 +4,29 @@ defmodule Client.GameTest do
   alias ClientWeb.Channels.GameChannel
 
   setup do
-    case Pong.start_link([]) do
-      {:ok, _} ->
-        ClientWeb.PongSubscription.create()
-        :ok
+    with {:ok, _} <- Pong.Engine.start_link([]),
+         {:ok, _} <- Pong.Renderer.start_link([]) do
+      ClientWeb.PongSubscription.create()
 
-      _ ->
-        :ok
+      :ok
+    else
+      _error -> :ok
     end
   end
 
   describe "gameplay" do
     test "updates watchers on every move" do
+      initial_state = Pong.Engine.state()
+
       {:ok, _, controller_socket} =
         socket()
         |> subscribe_and_join(GameChannel, "game:play")
 
-      {:ok, initial_state, _game_socket} =
+      {:ok, _, _} =
+        socket()
+        |> subscribe_and_join(GameChannel, "game:play")
+
+      {:ok, _, _game_socket} =
         socket()
         |> subscribe_and_join(GameChannel, "game:board")
 

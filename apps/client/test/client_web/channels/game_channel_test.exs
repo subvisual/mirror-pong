@@ -7,16 +7,6 @@ defmodule ClientWeb.Channels.GameChannelTest do
 
   @default_player_data %{player_id: :left, paddle_color: "black"}
 
-  describe "join game:board" do
-    test "returns the current game state" do
-      Pong.start_link([])
-
-      assert {:ok, %{game: %Pong.Game{}, players: %{left: nil, right: nil}}, _} =
-               socket()
-               |> subscribe_and_join(GameChannel, "game:board")
-    end
-  end
-
   describe "join game:play" do
     test "returns and assigns a player id and paddle color if there are spots available" do
       with_mock Pong, join: fn -> {:ok, @default_player_data} end do

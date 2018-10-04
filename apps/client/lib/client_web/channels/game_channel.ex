@@ -6,9 +6,7 @@ defmodule ClientWeb.Channels.GameChannel do
   end
 
   def join("game:board", _params, socket) do
-    current_state = Pong.game_state()
-
-    {:ok, current_state, socket}
+    {:ok, socket}
   end
 
   def join("game:play", _params, socket) do
