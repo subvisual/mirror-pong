@@ -57,6 +57,8 @@ defmodule Pong.Engine do
   end
 
   def handle_call({:leave, player_id}, _from, state) do
+    wait_for_next_cycle(state.period + 100)
+
     {:reply, :ok, remove_player(player_id, state)}
   end
 
@@ -125,6 +127,16 @@ defmodule Pong.Engine do
       player_left: nil,
       player_right: nil
     }
+  end
+
+  defp wait_for_next_cycle(timeout) do
+    receive do
+      :work ->
+        :ok
+    after
+      timeout ->
+        :ok
+    end
   end
 
   defp schedule_work(period) do
