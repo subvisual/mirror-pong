@@ -23,7 +23,6 @@ defmodule ClientWeb.PongSubscriptionTest do
       test_pid = self()
 
       with_mock Pong,
-        game_state: fn -> :ok end,
         subscribe: fn fun -> send test_pid, fun end do
         socket()
         |> subscribe_and_join(GameChannel, "game:board")
