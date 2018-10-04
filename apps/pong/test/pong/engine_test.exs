@@ -124,6 +124,38 @@ defmodule Pong.EngineTest do
       assert {:reply, :ok, ^state} =
                Engine.handle_call({:leave, :fake_id}, self(), state)
     end
+
+    test "waits for the pending cycle" do
+      # This is a pretty complicated test to do. The way I achieved it was by
+      # spawning a process that would block on the handle cast for a long time
+      # and send a message before that. We can then assert that it blocked by
+      # refuting having received before the period had passed and asserting to
+      # have received after it did. We can take this test further by spawning
+      # the same process again but sending the :work message immediately and
+      # asserting that it replied back
+      state = build_pong_state(player_right: true, period: 200)
+      pid = self()
+
+      spawn fn ->
+        Engine.handle_call({:leave, :right}, self(), state)
+
+        send pid, :checkpoint_1
+      end
+
+      refute_receive :checkpoint_1, 100
+      assert_receive :checkpoint_1, 200
+
+      child_pid =
+        spawn fn ->
+          Engine.handle_call({:leave, :right}, self(), state)
+
+          send pid, :checkpoint_2
+        end
+
+      send child_pid, :work
+
+      assert_receive :checkpoint_2, 100
+    end
   end
 
   describe "handle_call/3 for :state messages" do
