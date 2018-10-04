@@ -10,6 +10,8 @@ export default class GameAnimator {
   }
 
   animate = () => {
+    if (!this.positions) return;
+
     const { paddleLeft, paddleRight, ball } = this.positions;
 
     this.paddleLeft.setY(paddleLeft.y - paddleLeft.height / 2);
