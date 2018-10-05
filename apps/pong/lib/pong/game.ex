@@ -6,7 +6,7 @@ defmodule Pong.Game do
     :paddle_right
   ]
 
-  alias __MODULE__
+  alias Pong.Movement
 
   alias Pong.Game.{
     Ball,
@@ -17,7 +17,7 @@ defmodule Pong.Game do
   @type t :: %__MODULE__{}
   @type player_ref :: :left | :right
 
-  @spec new :: Game.t()
+  @spec new :: t()
   def new do
     board = Board.new()
 
@@ -36,31 +36,15 @@ defmodule Pong.Game do
     }
   end
 
-  @doc """
-  Applies the ball movement to the game.
-  """
-  @spec apply(Game.t()) :: Game.t()
-  def apply(
-        %{
-          ball: ball,
-          board: board,
-          paddle_left: paddle_left,
-          paddle_right: paddle_right
-        } = game
-      ) do
-    %{game | ball: Ball.move(ball, board, paddle_left, paddle_right)}
-  end
-
-  @doc """
-  Applies movement to one of the paddles.
-  """
-  @spec move(Game.t(), player_ref(), Paddle.direction()) :: Game.t()
-  def move(game, player_ref, direction) do
+  # TODO: This will be moved to the apply cycle within Pong.Movement when we
+  # are able to buffer and fold similar actions between consecutive applies
+  @spec move(t(), player_ref(), Paddle.direction()) :: t()
+  def move(%__MODULE__{} = game, player_ref, direction) do
     paddle_ref = String.to_existing_atom("paddle_#{player_ref}")
 
     paddle =
       Map.get(game, paddle_ref)
-      |> Paddle.move(direction, game.board)
+      |> Movement.apply_to(direction, game.board)
 
     Map.put(game, paddle_ref, paddle)
   end

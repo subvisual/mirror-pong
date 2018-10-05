@@ -16,9 +16,7 @@ defmodule Pong.Game.Ball do
 
   import Pong.Config, only: [config!: 2]
 
-  alias Pong.Game.{Ball, Board}
-
-  @spec new() :: Ball.t()
+  @spec new() :: t()
   def new do
     start_x = config!(__MODULE__, :start_x)
     start_y = config!(__MODULE__, :start_y)
@@ -36,12 +34,28 @@ defmodule Pong.Game.Ball do
     }
   end
 
-  @spec move(Ball.t(), Board.t(), Paddle.t(), Paddle.t()) :: Ball.t()
-  def move(ball, board, paddle_left, paddle_right) do
-    ball
-    |> apply_vector()
-    |> apply_board_collision(board)
-    |> apply_paddle_collisions(paddle_left, paddle_right)
+  @spec apply_vector(t()) :: t()
+  def apply_vector(%__MODULE__{} = ball) do
+    %{
+      ball
+      | x: ball.x + ball.vector_x * ball.speed,
+        y: ball.y + ball.vector_y * ball.speed
+    }
+  end
+
+  @spec ensure_between_height(t(), integer(), integer()) :: t()
+  def ensure_between_height(%__MODULE__{} = ball, min, max),
+    do: clamp_coordinate(ball, :y, min, max)
+
+  @spec ensure_between_width(t(), integer(), integer()) :: t()
+  def ensure_between_width(%__MODULE__{} = ball, min, max),
+    do: clamp_coordinate(ball, :x, min, max)
+
+  @spec reverse_vector_component(t(), :x | :y) :: t()
+  def reverse_vector_component(%__MODULE__{} = ball, component) do
+    vector_component = String.to_existing_atom("vector_#{component}")
+
+    Map.update!(ball, vector_component, &(&1 * -1))
   end
 
   defp generate_random_vector do
@@ -67,76 +81,13 @@ defmodule Pong.Game.Ball do
     |> Kernel.*(vector_component)
   end
 
-  defp apply_vector(ball) do
-    %{
-      ball
-      | x: ball.x + ball.vector_x * ball.speed,
-        y: ball.y + ball.vector_y * ball.speed
-    }
-  end
-
-  defp apply_board_collision(ball, board) do
-    cond do
-      collided_top_wall?(ball, board) or collided_bottom_wall?(ball) ->
-        ball
-        |> clamp_coordinate(:y, board)
-        |> reverse_vector_component(:vector_y)
-
-      collided_right_wall?(ball, board) or collided_left_wall?(ball) ->
-        ball
-        |> clamp_coordinate(:x, board)
-        |> reverse_vector_component(:vector_x)
-
-      true ->
-        ball
-    end
-  end
-
-  defp apply_paddle_collisions(ball, paddle_left, paddle_right) do
-    cond do
-      collided_left_paddle?(ball, paddle_left) or
-          collided_right_paddle?(ball, paddle_right) ->
-        ball
-        |> reverse_vector_component(:vector_x)
-
-      true ->
-        ball
-    end
-  end
-
-  defp collided_left_paddle?(ball, paddle_left),
-    do:
-      ball.x - ball.radius <= paddle_left.x and
-        ball.y <= paddle_left.y + paddle_left.height / 2 and
-        ball.y >= paddle_left.y - paddle_left.height / 2
-
-  defp collided_right_paddle?(ball, paddle_right),
-    do:
-      ball.x + ball.radius >= paddle_right.x and
-        ball.y <= paddle_right.y + paddle_right.height / 2 and
-        ball.y >= paddle_right.y - paddle_right.height / 2
-
-  defp collided_top_wall?(ball, board),
-    do: ball.y >= board.height - ball.radius
-
-  defp collided_right_wall?(ball, board),
-    do: ball.x >= board.width - ball.radius
-
-  defp collided_left_wall?(ball), do: ball.x <= ball.radius
-
-  defp collided_bottom_wall?(ball), do: ball.y <= ball.radius
-
-  defp clamp_coordinate(ball, coordinate, board) do
+  defp clamp_coordinate(ball, coordinate, min, max) do
     clamped_coordinate =
       ball
       |> Map.get(coordinate)
-      |> min(board.height - ball.radius)
-      |> max(ball.radius)
+      |> min(max - ball.radius)
+      |> max(min + ball.radius)
 
     Map.put(ball, coordinate, clamped_coordinate)
-  end
-
-  defp reverse_vector_component(ball, component) do
-    Map.update!(ball, component, &(&1 * -1))
   end
 end
