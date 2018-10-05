@@ -51,82 +51,61 @@ defmodule Pong.Game.BallTest do
     end
   end
 
-  describe "move/4" do
-    test "updates the coordinates using the vector and the speed" do
-      board = build(:board)
-      ball = build(:ball, vector_x: 1, vector_y: -1, speed: 2)
-      paddle_left = build(:paddle)
-      paddle_right = build(:paddle)
+  describe "ensure_between_height/3" do
+    test "prevents the y coordinate from being over the max value" do
+      ball = build(:ball, y: 10, radius: 1)
 
-      %{x: x, y: y} = Ball.move(ball, board, paddle_left, paddle_right)
+      updated_ball = Ball.ensure_between_height(ball, 0, 5)
 
-      assert x == ball.x + 2
-      assert y == ball.y - 2
+      assert updated_ball.x == ball.x
+      # center is at max - radius
+      assert updated_ball.y == 4
     end
 
-    test "prevents the ball from overflowing off the game board" do
-      board = build(:board)
-      paddle_left = build(:paddle)
-      paddle_right = build(:paddle)
-      # all balls are 1 unit away from their respective wall
-      top_wall_ball =
-        build(:ball, radius: 5, y: board.height - 6, vector_y: 1, speed: 10)
+    test "prevents the y coordinate from being under the min value" do
+      ball = build(:ball, y: 10, radius: 1)
 
-      right_wall_ball =
-        build(:ball, radius: 5, x: board.width - 6, vector_x: 1, speed: 10)
+      updated_ball = Ball.ensure_between_height(ball, 20, 30)
 
-      bottom_wall_ball = build(:ball, radius: 5, y: 6, vector_y: -1, speed: 10)
-      left_wall_ball = build(:ball, radius: 5, x: 6, vector_x: -1, speed: 10)
+      assert updated_ball.x == ball.x
+      # center is at min - radius
+      assert updated_ball.y == 21
+    end
+  end
 
-      %{y: top_wall_ball_y} =
-        Ball.move(top_wall_ball, board, paddle_left, paddle_right)
+  describe "ensure_between_width/3" do
+    test "prevents the x coordinate from being over the max value" do
+      ball = build(:ball, x: 10, radius: 1)
 
-      %{x: right_wall_ball_x} =
-        Ball.move(right_wall_ball, board, paddle_left, paddle_right)
+      updated_ball = Ball.ensure_between_width(ball, 0, 5)
 
-      %{y: bottom_wall_ball_y} =
-        Ball.move(bottom_wall_ball, board, paddle_left, paddle_right)
-
-      %{x: left_wall_ball_x} =
-        Ball.move(left_wall_ball, board, paddle_left, paddle_right)
-
-      assert top_wall_ball_y == board.height - top_wall_ball.radius
-      assert right_wall_ball_x == board.height - right_wall_ball.radius
-      assert bottom_wall_ball_y == bottom_wall_ball.radius
-      assert left_wall_ball_x == left_wall_ball.radius
+      assert updated_ball.y == ball.y
+      # center is at max - radius
+      assert updated_ball.x == 4
     end
 
-    test "updates the vector when colliding with the wall" do
-      board = build(:board)
-      paddle_left = build(:paddle, x: 30, y: 0)
-      paddle_right = build(:paddle, x: 970, y: 0)
+    test "prevents the x coordinate from being under the min value" do
+      ball = build(:ball, x: 10, radius: 1)
 
-      # all balls are 1 unit away from their respective wall
-      top_wall_ball =
-        build(:ball, radius: 5, y: board.height - 6, vector_y: 1, speed: 10)
+      updated_ball = Ball.ensure_between_width(ball, 20, 30)
 
-      right_wall_ball =
-        build(:ball, radius: 5, x: board.width - 6, vector_x: 1, speed: 10)
+      assert updated_ball.y == ball.y
+      # center is at min - radius
+      assert updated_ball.x == 21
+    end
+  end
 
-      bottom_wall_ball = build(:ball, radius: 5, y: 6, vector_y: -1, speed: 10)
-      left_wall_ball = build(:ball, radius: 5, x: 6, vector_x: -1, speed: 10)
+  describe "reverse_vector_component/2" do
+    test "reverses the corresponding vector component" do
+      ball = build(:ball, vector_x: 1, vector_y: 1)
 
-      %{vector_y: top_wall_vector_y} =
-        Ball.move(top_wall_ball, board, paddle_left, paddle_right)
+      updated_ball =
+        ball
+        |> Ball.reverse_vector_component(:x)
+        |> Ball.reverse_vector_component(:y)
 
-      %{vector_x: right_wall_vector_x} =
-        Ball.move(right_wall_ball, board, paddle_left, paddle_right)
-
-      %{vector_y: bottom_wall_vector_y} =
-        Ball.move(bottom_wall_ball, board, paddle_left, paddle_right)
-
-      %{vector_x: left_wall_vector_x} =
-        Ball.move(left_wall_ball, board, paddle_left, paddle_right)
-
-      assert top_wall_vector_y == -top_wall_ball.vector_y
-      assert right_wall_vector_x == -right_wall_ball.vector_x
-      assert bottom_wall_vector_y == -bottom_wall_ball.vector_y
-      assert left_wall_vector_x == -left_wall_ball.vector_x
+      assert updated_ball.vector_x == -ball.vector_x
+      assert updated_ball.vector_y == -ball.vector_y
     end
   end
 end

@@ -15,10 +15,7 @@ defmodule Pong.Game.Paddle do
 
   @default_speed 5
 
-  alias __MODULE__
-  alias Pong.Game.Board
-
-  @spec new(keyword()) :: Paddle.t()
+  @spec new(keyword()) :: t()
   def new(args) do
     height = config!(__MODULE__, :height)
     margin = config!(__MODULE__, :margin)
@@ -44,13 +41,6 @@ defmodule Pong.Game.Paddle do
     }
   end
 
-  @spec move(Paddle.t(), Paddle.direction(), Board.t()) :: Paddle.t()
-  def move(paddle, direction, board) do
-    paddle
-    |> apply_vector(direction)
-    |> prevent_overflow(board)
-  end
-
   @spec random_fills(integer()) :: String.t()
   def random_fills(n) do
     config!(__MODULE__, :fills)
@@ -61,19 +51,20 @@ defmodule Pong.Game.Paddle do
   @spec random_fill :: String.t()
   def random_fill, do: random_fills(1) |> List.first()
 
-  defp apply_vector(%{y: y} = paddle, :up) do
-    %{paddle | y: y + @default_speed}
-  end
+  @spec apply_vector(t(), direction) :: t()
+  def apply_vector(%__MODULE__{y: y} = paddle, :up),
+    do: %{paddle | y: y + @default_speed}
 
-  defp apply_vector(%{y: y} = paddle, :down) do
-    %{paddle | y: y - @default_speed}
-  end
+  @spec apply_vector(t(), direction) :: t()
+  def apply_vector(%__MODULE__{y: y} = paddle, :down),
+    do: %{paddle | y: y - @default_speed}
 
-  defp prevent_overflow(paddle, board) do
+  @spec ensure_between(t(), integer(), integer()) :: t()
+  def ensure_between(%__MODULE__{} = paddle, min, max) do
     clamped_y =
       paddle.y
-      |> min(board.height - paddle.height / 2)
-      |> max(paddle.height / 2)
+      |> min(max - paddle.height / 2)
+      |> max(min + paddle.height / 2)
 
     %{paddle | y: clamped_y}
   end

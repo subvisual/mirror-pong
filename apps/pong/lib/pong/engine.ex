@@ -1,7 +1,11 @@
 defmodule Pong.Engine do
   use GenServer
 
-  alias Pong.{Game, Renderer}
+  alias Pong.{
+    Game,
+    Movement,
+    Renderer
+  }
 
   import Pong.Config, only: [config: 3]
 
@@ -79,7 +83,7 @@ defmodule Pong.Engine do
   end
 
   def handle_info(:work, %{game: game} = state) do
-    new_state = %{state | game: Game.apply(game)}
+    new_state = %{state | game: Movement.apply_to(game)}
 
     schedule_work(new_state.period)
 

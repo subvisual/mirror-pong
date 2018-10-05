@@ -20,43 +20,45 @@ defmodule Pong.Game.PaddleTest do
     end
   end
 
-  describe "move/3" do
-    test "increments the y coordinate if moving up" do
+  describe "apply_vector/1" do
+    test "uses a positive vector when moving up" do
       paddle = build(:paddle)
-      board = build(:board)
 
-      %{y: y} = Paddle.move(paddle, :up, board)
+      updated_paddle = Paddle.apply_vector(paddle, :up)
 
-      assert y > paddle.y
+      assert updated_paddle.x == paddle.x
+      assert updated_paddle.y == paddle.y + 5
     end
 
-    test "decrements the y coordinate if moving down" do
+    test "uses a negative vector when moving down" do
       paddle = build(:paddle)
-      board = build(:board)
 
-      %{y: y} = Paddle.move(paddle, :down, board)
+      updated_paddle = Paddle.apply_vector(paddle, :down)
 
-      assert y < paddle.y
+      assert updated_paddle.x == paddle.x
+      assert updated_paddle.y == paddle.y - 5
+    end
+  end
+
+  describe "ensure_between/3" do
+    test "prevents the y coordinate from being over the max value" do
+      paddle = build(:paddle, y: 10, height: 2)
+
+      updated_paddle = Paddle.ensure_between(paddle, 0, 5)
+
+      assert updated_paddle.x == paddle.x
+      # center is at max - height / 2
+      assert updated_paddle.y == 4
     end
 
-    test "prevents the paddle from overflowing off the top of the game board" do
-      board = build(:board)
-      # position the paddle center 1 unit below the board edge
-      paddle = build(:paddle, height: 100, y: board.height - 51)
+    test "prevents the y coordinate from being under the min value" do
+      paddle = build(:paddle, y: 10, height: 2)
 
-      %{y: y} = Paddle.move(paddle, :up, board)
+      updated_paddle = Paddle.ensure_between(paddle, 20, 30)
 
-      assert y == board.height - 50
-    end
-
-    test "prevents the paddle from overflowing off the bottom of the game board" do
-      board = build(:board)
-      # position the paddle center 1 unit above the board edge
-      paddle = build(:paddle, height: 100, y: 51)
-
-      %{y: y} = Paddle.move(paddle, :down, board)
-
-      assert y == 50
+      assert updated_paddle.x == paddle.x
+      # center is at min - height / 2
+      assert updated_paddle.y == 21
     end
   end
 end
