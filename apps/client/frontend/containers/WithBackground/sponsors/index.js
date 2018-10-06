@@ -12,16 +12,16 @@ import Hostel from './assets/hostelworld.svg';
 import Mediaweb from './assets/mediaweb.png';
 import PixelMatters from './assets/pixelmatters.svg';
 import Prozis from './assets/prozis.svg';
-import Pwit from './assets/pwit.svg';
+import PortugueseWomenInTech from './assets/pwit.png';
 import StartupBraga from './assets/sbs.svg';
 import Xing from './assets/xing.svg';
 
-const pngToJSX = png => () => (
+const pngToComponent = png => () => (
   <img height="200" width="200" src={png} alt="" />
 );
 
 export default [
-  pngToJSX(Balsamiq),
+  pngToComponent(Balsamiq),
   Bosch,
   Burocratik,
   Farfetch,
@@ -30,10 +30,10 @@ export default [
   Hi,
   Seegno,
   Hostel,
-  pngToJSX(Mediaweb),
+  pngToComponent(Mediaweb),
   PixelMatters,
   Prozis,
-  Pwit,
+  pngToComponent(PortugueseWomenInTech),
   StartupBraga,
   Xing,
 ];
