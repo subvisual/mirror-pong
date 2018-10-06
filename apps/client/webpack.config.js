@@ -11,13 +11,6 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.svg/,
-        use: {
-          loader: 'react-svg-loader',
-          options: {},
-        },
-      },
-      {
         test: /\.(js|jsx)$/,
         exclude: /(node_modules)/,
         use: { loader: 'babel-loader' },
@@ -35,6 +28,25 @@ module.exports = {
           },
           'postcss-loader',
         ],
+      },
+      {
+        test: /\.png/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[path][name]-[hash:8].[ext]',
+              publicPath: 'assets/',
+            },
+          },
+        ],
+      },
+      {
+        test: /\.svg/,
+        use: {
+          loader: 'react-svg-loader',
+          options: {},
+        },
       },
     ],
   },

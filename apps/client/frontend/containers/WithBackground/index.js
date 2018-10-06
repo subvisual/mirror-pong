@@ -1,24 +1,22 @@
 import React, { Component, Fragment } from 'react';
 
 import Centered from '../../components/Centered';
-import Seegno from './sponsors/seegno.svg';
-import Bosch from './sponsors/bosch.svg';
+
+import Sponsors from './sponsors';
 
 import './index.css';
-
-const SPONSORS = [Seegno, Bosch];
 
 export default function(Child) {
   return class WithBackground extends Component {
     state = {
-      index: SPONSORS.length,
+      index: Sponsors.length,
     };
 
     componentDidMount() {
       this.interval = setInterval(() => {
         this.setState(prevState => {
           const newIndex =
-            prevState.index === SPONSORS.length ? 0 : prevState.index + 1;
+            prevState.index === Sponsors.length ? 0 : prevState.index + 1;
 
           return { index: newIndex };
         });
@@ -32,7 +30,7 @@ export default function(Child) {
     sponsorLogo() {
       const { index } = this.state;
 
-      const LogoComponent = SPONSORS[index];
+      const LogoComponent = Sponsors[index];
 
       return <LogoComponent />;
     }
@@ -41,7 +39,7 @@ export default function(Child) {
       const { index } = this.state;
 
       const renderLogo =
-        index === SPONSORS.length ? 'Mirror Conf' : this.sponsorLogo();
+        index === Sponsors.length ? 'Mirror Conf' : this.sponsorLogo();
 
       return (
         <Fragment>

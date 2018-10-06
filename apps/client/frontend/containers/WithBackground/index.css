@@ -32,3 +32,9 @@
 .logo * svg {
   transform: scale(2.5);
 }
+
+.logo * img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+}
