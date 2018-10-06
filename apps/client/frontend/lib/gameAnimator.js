@@ -1,9 +1,8 @@
 import { Animation } from 'konva';
 
 export default class GameAnimator {
-  constructor({ layer, stage, paddleLeft, paddleRight, ball }) {
+  constructor({ layer, paddleLeft, paddleRight, ball }) {
     this.layer = layer;
-    this.stage = stage;
     this.paddleLeft = paddleLeft;
     this.paddleRight = paddleRight;
     this.ball = ball;
@@ -13,10 +12,8 @@ export default class GameAnimator {
   animate = () => {
     if (!this.positions) return;
 
-    const { paddleLeft, paddleRight, ball, width, height } = this.positions;
+    const { paddleLeft, paddleRight, ball } = this.positions;
 
-    this.stage.setHeight(height);
-    this.stage.setWidth(width);
     this.paddleLeft.setY(paddleLeft.y - paddleLeft.height / 2);
     this.paddleLeft.setX(paddleLeft.x);
     this.paddleRight.setY(paddleRight.y - paddleRight.height / 2);

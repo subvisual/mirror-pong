@@ -55,7 +55,28 @@ export default class Board extends Component {
   };
 
   componentDidMount() {
-    this.instantiateGameAnimator();
+    this.gameAnimator = new GameAnimator({
+      layer: this.layerRef,
+      stage: this.stageRef,
+      paddleLeft: this.paddleLeftRef,
+      paddleRight: this.paddleRightRef,
+      ball: this.ballRef,
+    });
+
+    const { channel } = this.props;
+
+    channel.on('data', data => {
+      const { width, height } = this.props;
+
+      const newPositions = positioning.repositionGame({
+        dimensions: { width, height },
+        game: data.game,
+      });
+
+      this.gameAnimator.setPositions(newPositions);
+    });
+
+    this.gameAnimator.start();
   }
 
   // Only update when screen width:height changes
@@ -66,38 +87,9 @@ export default class Board extends Component {
     return width !== nextWidth || height !== nextHeight;
   }
 
-  componentDidUpdate() {
-    this.instantiateGameAnimator();
-  }
-
   componentWillUnmount() {
     this.gameAnimator.stop();
   }
-
-  instantiateGameAnimator = () => {
-    if (this.gameAnimator) this.gameAnimator.stop();
-
-    this.gameAnimator = new GameAnimator({
-      layer: this.layerRef,
-      stage: this.stageRef,
-      paddleLeft: this.paddleLeftRef,
-      paddleRight: this.paddleRightRef,
-      ball: this.ballRef,
-    });
-
-    const { channel, width, height } = this.props;
-
-    channel.on('data', data => {
-      const newPositions = positioning.repositionGame({
-        dimensions: { width, height },
-        game: data.game,
-      });
-
-      this.gameAnimator.setPositions(newPositions);
-    });
-
-    this.gameAnimator.start();
-  };
 
   render() {
     const { game, width, height } = this.props;
@@ -108,16 +100,7 @@ export default class Board extends Component {
     });
 
     return (
-      <Stage
-        width={width}
-        height={height}
-        styleName="root"
-        ref={ref => {
-          if (!ref) return;
-
-          this.stageRef = ref.getStage();
-        }}
-      >
+      <Stage width={width} height={height} styleName="root">
         <Layer
           ref={ref => {
             this.layerRef = ref;
