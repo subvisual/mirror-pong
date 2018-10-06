@@ -26,7 +26,7 @@
 }
 
 .logo {
-  animation: fadeinout 5s infinite;
+  animation: fadeinout 4.5s infinite;
 }
 
 .logo * svg {
