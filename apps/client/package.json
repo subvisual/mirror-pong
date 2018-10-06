@@ -55,6 +55,7 @@
     "precss": "^3.1.2",
     "prettier": "^1.14.2",
     "react-hot-loader": "^4.3.11",
+    "react-svg-loader": "^2.1.0",
     "stylelint": "^9.5.0",
     "stylelint-config-prettier": "^4.0.0",
     "stylelint-order": "^1.0.0",

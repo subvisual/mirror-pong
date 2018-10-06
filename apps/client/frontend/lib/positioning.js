@@ -70,6 +70,7 @@ const repositionGame = ({ dimensions, game }) => {
 
   return {
     ...game,
+    ...dimensions,
     ball: repositionedBall,
     paddleLeft: { ...paddleLeft, ...repositionedPaddleLeft },
     paddleRight: { ...paddleRight, ...repositionedPaddleRight },

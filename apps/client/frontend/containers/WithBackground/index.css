@@ -1,0 +1,34 @@
+@import '../../settings.css';
+
+.root {
+  position: absolute;
+  z-index: -1;
+
+  width: 100%;
+  height: 100%;
+
+  background-color: var(--charcoal);
+}
+
+@keyframes fadeinout {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.logo {
+  animation: fadeinout 5s infinite;
+}
+
+.logo * svg {
+  transform: scale(2.5);
+}
