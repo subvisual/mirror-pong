@@ -1,5 +1,6 @@
 defmodule Pong.Factory do
   alias Pong.Game
+  alias Pong.Movement
 
   alias Pong.Game.{
     Ball,
@@ -60,6 +61,19 @@ defmodule Pong.Factory do
     %Board{
       width: 1000,
       height: 1000
+    }
+  end
+
+  def movement_buffer_factory do
+    %Movement.Buffer{
+      left: %{
+        up: 0,
+        down: 0
+      },
+      right: %{
+        up: 0,
+        down: 0
+      }
     }
   end
 end

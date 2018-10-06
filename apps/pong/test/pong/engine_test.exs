@@ -2,7 +2,11 @@ defmodule Pong.EngineTest do
   use ExUnit.Case
   doctest Pong.Engine
 
-  alias Pong.Engine
+  alias Pong.{
+    Engine,
+    Movement,
+    Renderer
+  }
 
   import Pong.Factory
   import Mock
@@ -16,31 +20,20 @@ defmodule Pong.EngineTest do
                fps: _,
                period: _,
                player_left: nil,
-               player_right: nil
+               player_right: nil,
+               movements: _
              } = state
     end
   end
 
   describe "handle_cast/2 for :move messages" do
-    test "moves the player in the game" do
-      with_mock Pong.Game, move: fn game, _, _ -> game end do
-        game = build(:game)
-        state = build_pong_state(game: game)
+    test "returns the state with an updated movements buffer" do
+      state = build_pong_state()
 
+      {:noreply, %{movements: movements}} =
         Engine.handle_cast({:move, :left, :up}, state)
 
-        assert called(Pong.Game.move(game, :left, :up))
-      end
-    end
-
-    test "returns the state with an updated game" do
-      game = build(:game)
-      state = build_pong_state(game: game)
-
-      {:noreply, %{game: new_game}} =
-        Engine.handle_cast({:move, :left, :up}, state)
-
-      assert new_game.paddle_left.y > game.paddle_left.y
+      assert movements.left == %{up: 1, down: 0}
     end
   end
 
@@ -62,7 +55,7 @@ defmodule Pong.EngineTest do
     end
 
     test "adds the right player if there is a left player" do
-      with_mock Pong.Renderer, start: fn -> :ok end do
+      with_mock Renderer, start: fn -> :ok end do
         state = build_pong_state(player_left: true)
         {:reply, _, new_state} = Engine.handle_call(:join, self(), state)
 
@@ -71,16 +64,16 @@ defmodule Pong.EngineTest do
     end
 
     test "starts the renderer" do
-      with_mock Pong.Renderer, start: fn -> :ok end do
+      with_mock Renderer, start: fn -> :ok end do
         state = build_pong_state(player_left: true)
         {:reply, _, _} = Engine.handle_call(:join, self(), state)
 
-        assert called(Pong.Renderer.start())
+        assert called(Renderer.start())
       end
     end
 
     test "schedules work if all players are ready" do
-      with_mock Pong.Renderer, start: fn -> :ok end do
+      with_mock Renderer, start: fn -> :ok end do
         state = build_pong_state(player_left: true, period: 1)
         {:reply, _, _} = Engine.handle_call(:join, self(), state)
 
@@ -170,7 +163,7 @@ defmodule Pong.EngineTest do
 
   describe "handle_call/3 for :stop messages" do
     test "resets the state" do
-      with_mock Pong.Renderer, stop: fn -> :ok end do
+      with_mock Renderer, stop: fn -> :ok end do
         state =
           build_pong_state(
             player_left: true,
@@ -189,7 +182,7 @@ defmodule Pong.EngineTest do
     end
 
     test "stops the renderer" do
-      with_mock Pong.Renderer, stop: fn -> :ok end do
+      with_mock Renderer, stop: fn -> :ok end do
         state =
           build_pong_state(
             player_left: true,
@@ -198,7 +191,36 @@ defmodule Pong.EngineTest do
 
         {:reply, _, _} = Engine.handle_call(:stop, self(), state)
 
-        assert called(Pong.Renderer.stop())
+        assert called(Renderer.stop())
+      end
+    end
+  end
+
+  describe "handle_info/2 for :work messages" do
+    test "schedules a new work cycle" do
+      state = build_pong_state(period: 1)
+      {:noreply, _} = Engine.handle_info(:work, state)
+
+      assert_receive :work, 100
+    end
+
+    test "applies the movements to the game" do
+      with_mock Movement, apply_to: fn _, _ -> :ok end do
+        state = build_pong_state(player_left: true, player_right: true)
+
+        {:noreply, _} = Engine.handle_info(:work, state)
+
+        assert called(Movement.apply_to(state.game, state.movements))
+      end
+    end
+
+    test "resets the movement buffer" do
+      with_mock Movement, apply_to: fn _, _ -> :ok end do
+        state = build_pong_state(player_left: true, player_right: true)
+
+        {:noreply, new_state} = Engine.handle_info(:work, state)
+
+        assert new_state.movements == Movement.Buffer.new()
       end
     end
   end
@@ -209,7 +231,8 @@ defmodule Pong.EngineTest do
       fps: 60,
       period: Kernel.trunc(1 / 60 * 1_000),
       player_left: nil,
-      player_right: nil
+      player_right: nil,
+      movements: Movement.Buffer.new()
     ]
     |> Keyword.merge(overrides)
     |> Enum.into(%{})

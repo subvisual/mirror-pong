@@ -38,8 +38,8 @@ defmodule Pong.Game.Ball do
   def apply_vector(%__MODULE__{} = ball) do
     %{
       ball
-      | x: ball.x + ball.vector_x * ball.speed,
-        y: ball.y + ball.vector_y * ball.speed
+      | x: ball.x + ball.vector_x,
+        y: ball.y + ball.vector_y
     }
   end
 

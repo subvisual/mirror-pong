@@ -41,9 +41,9 @@ defmodule Pong.Engine do
     {:ok, state}
   end
 
-  def handle_cast({:move, player, direction}, %{game: game} = state) do
-    updated_game = Game.move(game, player, direction)
-    new_state = %{state | game: updated_game}
+  def handle_cast({:move, player, direction}, %{movements: movements} = state) do
+    updated_movements = Movement.Buffer.add(movements, player, direction)
+    new_state = %{state | movements: updated_movements}
 
     {:noreply, new_state}
   end
@@ -82,8 +82,12 @@ defmodule Pong.Engine do
     {:reply, new_state.game, new_state}
   end
 
-  def handle_info(:work, %{game: game} = state) do
-    new_state = %{state | game: Movement.apply_to(game)}
+  def handle_info(:work, %{game: game, movements: movements} = state) do
+    new_state = %{
+      state
+      | game: Movement.apply_to(game, movements),
+        movements: Movement.Buffer.new()
+    }
 
     schedule_work(new_state.period)
 
@@ -129,7 +133,8 @@ defmodule Pong.Engine do
       fps: fps,
       period: Kernel.trunc(1 / fps * 1_000),
       player_left: nil,
-      player_right: nil
+      player_right: nil,
+      movements: Movement.Buffer.new()
     }
   end
 

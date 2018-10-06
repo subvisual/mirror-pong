@@ -7,21 +7,14 @@ defmodule Pong.Movement do
     Paddle
   }
 
-  @doc """
-  Applies movement to one of the paddles.
-  """
-  @spec apply_to(Paddle.t(), Paddle.direction(), Board.t()) :: Paddle.t()
-  def apply_to(%Paddle{} = paddle, direction, %Board{} = board) do
-    paddle
-    |> Paddle.apply_vector(direction)
-    |> Paddle.ensure_between(0, board.height)
-  end
+  alias Pong.Movement.Buffer
 
   @doc """
-  Applies movement to the whole game.
+  Applies the buffer movements to the paddles and computes all new positions
+  resulting of the ball movement and collisions.
   """
-  @spec apply_to(Game.t()) :: Game.t()
-  def apply_to(%Game{} = game) do
+  @spec apply_to(Game.t(), Buffer.t()) :: Game.t()
+  def apply_to(%Game{} = game, %Buffer{} = buffer) do
     %{
       ball: ball,
       board: board,
@@ -29,13 +22,42 @@ defmodule Pong.Movement do
       paddle_right: paddle_right
     } = game
 
-    moved_ball =
-      ball
-      |> apply_ball_movement(board)
-      |> apply_leftside_collision(paddle_left)
-      |> apply_rightside_collision(paddle_right)
+    movements = Buffer.events(buffer)
 
-    %{game | ball: moved_ball}
+    updated_paddle_left =
+      apply_paddle_movements(paddle_left, movements[:left], board)
+
+    updated_paddle_right =
+      apply_paddle_movements(paddle_right, movements[:right], board)
+
+    updated_ball =
+      Enum.reduce(1..ball.speed, ball, fn _, acc ->
+        acc
+        |> apply_ball_movement(board)
+        |> apply_leftside_collision(updated_paddle_left)
+        |> apply_rightside_collision(updated_paddle_right)
+      end)
+
+    %{
+      game
+      | ball: updated_ball,
+        paddle_left: updated_paddle_left,
+        paddle_right: updated_paddle_right
+    }
+  end
+
+  defp apply_paddle_movements(paddle, movements, board) do
+    Enum.reduce(
+      movements,
+      paddle,
+      &apply_paddle_movement(&2, &1, board)
+    )
+  end
+
+  defp apply_paddle_movement(paddle, direction, board) do
+    paddle
+    |> Paddle.apply_vector(direction)
+    |> Paddle.ensure_between(0, board.height)
   end
 
   defp apply_ball_movement(%Ball{} = ball, %Board{} = board) do
