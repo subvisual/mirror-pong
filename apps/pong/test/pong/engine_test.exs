@@ -19,6 +19,7 @@ defmodule Pong.EngineTest do
                game: _,
                fps: _,
                period: _,
+               start_delay: _,
                player_left: nil,
                player_right: nil,
                movements: _
@@ -55,8 +56,9 @@ defmodule Pong.EngineTest do
     end
 
     test "adds the right player if there is a left player" do
-      with_mock Renderer, start: fn _ -> :ok end do
+      with_mock Renderer, start: fn _, _ -> :ok end do
         state = build_pong_state(player_left: true)
+
         {:reply, _, new_state} = Engine.handle_call(:join, self(), state)
 
         assert new_state[:player_right]
@@ -64,17 +66,19 @@ defmodule Pong.EngineTest do
     end
 
     test "starts the renderer" do
-      with_mock Renderer, start: fn _ -> :ok end do
+      with_mock Renderer, start: fn _, _ -> :ok end do
         state = build_pong_state(player_left: true)
+
         {:reply, _, _} = Engine.handle_call(:join, self(), state)
 
-        assert called(Renderer.start(state.game))
+        assert called(Renderer.start(state.game, state.start_delay))
       end
     end
 
     test "schedules work if all players are ready" do
-      with_mock Renderer, start: fn _ -> :ok end do
-        state = build_pong_state(player_left: true, period: 1)
+      with_mock Renderer, start: fn _, _ -> :ok end do
+        state = build_pong_state(player_left: true, period: 1, start_delay: 1)
+
         {:reply, _, _} = Engine.handle_call(:join, self(), state)
 
         assert_receive :work, 100
@@ -82,11 +86,11 @@ defmodule Pong.EngineTest do
     end
 
     test "doesn't schedule work when a player is missing" do
-      state = build_pong_state(period: 1)
+      state = build_pong_state(period: 1, start_delay: 1)
 
       {:reply, _, _} = Engine.handle_call(:join, self(), state)
 
-      refute_receive :work, 100
+      refute_receive :start, 100
     end
 
     test "returns the player data" do
@@ -199,6 +203,7 @@ defmodule Pong.EngineTest do
   describe "handle_info/2 for :work messages" do
     test "schedules a new work cycle" do
       state = build_pong_state(period: 1)
+
       {:noreply, _} = Engine.handle_info(:work, state)
 
       assert_receive :work, 100
@@ -230,6 +235,7 @@ defmodule Pong.EngineTest do
       game: build(:game),
       fps: 60,
       period: Kernel.trunc(1 / 60 * 1_000),
+      start_delay: 100,
       player_left: nil,
       player_right: nil,
       movements: Movement.Buffer.new()

@@ -1,6 +1,8 @@
 use Mix.Config
 
-config :pong, Pong, fps: 60
+config :pong, Pong,
+  fps: 60,
+  start_delay: 3_000
 
 config :pong, Pong.Game.Board,
   width: 1000,
@@ -31,3 +33,5 @@ config :pong, Pong.Game.Paddle,
     # honeysuckle (yellow)
     "#F1FA8C"
   ]
+
+import_config "#{Mix.env()}.exs"

@@ -30,21 +30,13 @@ defmodule Client.GameTest do
         socket()
         |> subscribe_and_join(GameChannel, "game:play")
 
-      assert_broadcast("dimensions", %{
-        "board" => [_, _],
-        "ball" => _,
-        "paddle" => [_, _]
-      })
+      assert_broadcast("game_starting", %{"delay" => _, "game" => _}, 150)
 
       push(controller_socket, "player:move", %{"direction" => "up"})
 
-      assert_broadcast("data", %{
-        "ball" => [_, _],
-        "paddle_left" => [_, paddle_left_y],
-        "paddle_right" => [_, _]
-      })
+      assert_broadcast("data", data, 200)
 
-      assert paddle_left_y > initial_state.game.paddle_left.y
+      assert data.game.paddle_left.y > initial_state.game.paddle_left.y
     end
   end
 end

@@ -20,28 +20,24 @@ defmodule Pong.RendererTest do
   end
 
   describe "handle_cast/2 for :start messages" do
-    test "schedules work" do
+    test "schedules work according to the delay argument" do
       state = build_state()
       game = build(:game)
 
-      {:noreply, _} = Renderer.handle_cast({:start, game}, state)
+      {:noreply, _} = Renderer.handle_cast({:start, game, 50}, state)
 
+      refute_receive :work, 10
       assert_receive :work, 100
     end
 
-    test "broadcasts the game dimensions" do
+    test "broadcasts the game and the delay" do
       subscriptions = [fn data -> send self(), data end]
       state = build_state(subscriptions: subscriptions)
       game = build(:game)
 
-      {:noreply, _} = Renderer.handle_cast({:start, game}, state)
+      {:noreply, _} = Renderer.handle_cast({:start, game, 10}, state)
 
-      assert_receive {"dimensions",
-                      %{
-                        "ball" => _,
-                        "board" => [_, _],
-                        "paddle" => [_, _]
-                      }}
+      assert_receive {"game_starting", %{"delay" => _, "game" => _}}
     end
   end
 
@@ -92,18 +88,13 @@ defmodule Pong.RendererTest do
 
   describe "handle_info/2 for :work messages" do
     test "broadcasts the game state to all subscriptions" do
-      with_mock Pong.Engine, state: fn -> %{game: build(:game)} end do
+      with_mock Pong.Engine, state: fn -> :ok end do
         subscriptions = [fn data -> send self(), data end]
         state = build_state(subscriptions: subscriptions)
 
         {:noreply, _} = Renderer.handle_info(:work, state)
 
-        assert_receive {"data",
-                        %{
-                          "ball" => [_, _],
-                          "paddle_left" => [_, _],
-                          "paddle_right" => [_, _]
-                        }}
+        assert_receive {"data", :ok}
       end
     end
   end

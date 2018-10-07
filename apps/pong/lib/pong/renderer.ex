@@ -15,8 +15,8 @@ defmodule Pong.Renderer do
     GenServer.cast(__MODULE__, {:subscribe, fun})
   end
 
-  def start(%Game{} = game) do
-    GenServer.cast(__MODULE__, {:start, game})
+  def start(%Game{} = game, delay) do
+    GenServer.cast(__MODULE__, {:start, game, delay})
   end
 
   def stop do
@@ -31,11 +31,13 @@ defmodule Pong.Renderer do
     {:noreply, %{state | subscriptions: [sub | subscriptions]}}
   end
 
-  def handle_cast({:start, game}, state) do
-    dimensions = game |> parse_dimensions()
-    broadcast(state.subscriptions, {"dimensions", dimensions})
+  def handle_cast({:start, game, delay}, state) do
+    broadcast(
+      state.subscriptions,
+      {"game_starting", %{"delay" => delay, "game" => game}}
+    )
 
-    schedule_work(state.period)
+    schedule_work(delay)
 
     {:noreply, state}
   end
@@ -47,34 +49,12 @@ defmodule Pong.Renderer do
   end
 
   def handle_info(:work, state) do
-    game_state = Pong.Engine.state() |> parse_state()
+    game_state = Pong.Engine.state()
     broadcast(state.subscriptions, {"data", game_state})
 
     schedule_work(state.period)
 
     {:noreply, state}
-  end
-
-  defp parse_state(%{
-         game: %Game{
-           ball: ball,
-           paddle_left: paddle_left,
-           paddle_right: paddle_right
-         }
-       }) do
-    %{
-      "ball" => [ball.x, ball.y],
-      "paddle_left" => [paddle_left.x, paddle_left.y],
-      "paddle_right" => [paddle_right.x, paddle_right.y]
-    }
-  end
-
-  defp parse_dimensions(%{ball: ball, board: board, paddle_left: paddle}) do
-    %{
-      "ball" => ball.radius,
-      "board" => [board.width, board.height],
-      "paddle" => [paddle.width, paddle.height]
-    }
   end
 
   defp broadcast(subscriptions, game) do

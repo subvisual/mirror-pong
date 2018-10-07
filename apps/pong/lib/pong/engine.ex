@@ -10,6 +10,7 @@ defmodule Pong.Engine do
   import Pong.Config, only: [config: 3]
 
   @fps 60
+  @start_delay 3_000
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -51,7 +52,7 @@ defmodule Pong.Engine do
   def handle_call(:join, _from, state) do
     case add_player(state) do
       {:ok, player_data, new_state} ->
-        if players_ready?(new_state), do: start_game(state)
+        if players_ready?(new_state), do: prepare_start(state)
 
         {:reply, {:ok, player_data}, new_state}
 
@@ -120,19 +121,21 @@ defmodule Pong.Engine do
 
   defp players_ready?(state), do: state.player_left && state.player_right
 
-  defp start_game(state) do
-    Renderer.start(state.game)
+  defp prepare_start(%{game: game, start_delay: start_delay}) do
+    Renderer.start(game, start_delay)
 
-    schedule_work(state.period)
+    schedule_work(start_delay)
   end
 
   defp default_state do
     fps = config(Pong, :fps, @fps)
+    start_delay = config(Pong, :start_delay, @start_delay)
 
     %{
       game: Game.new(),
       fps: fps,
       period: Kernel.trunc(1 / fps * 1_000),
+      start_delay: start_delay,
       player_left: nil,
       player_right: nil,
       movements: Movement.Buffer.new()
