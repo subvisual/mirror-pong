@@ -10,7 +10,7 @@ defmodule ClientWeb.PongSubscriptionTest do
     test "adds a subscription to the pong process" do
       test_pid = self()
 
-      with_mock Pong, subscribe: fn _ -> send test_pid, :called end do
+      with_mock Pong, subscribe: fn _ -> send(test_pid, :called) end do
         PongSubscription.create()
 
         # We can't use assert called since we don't have access to the
@@ -23,16 +23,33 @@ defmodule ClientWeb.PongSubscriptionTest do
       test_pid = self()
 
       with_mock Pong,
-        subscribe: fn fun -> send test_pid, fun end do
+        subscribe: fn fun -> send(test_pid, fun) end do
         socket()
         |> subscribe_and_join(GameChannel, "game:board")
 
         PongSubscription.create()
 
         assert_received fun
-        fun.(%{"game" => :ok})
+        fun.({"data", %{"game" => :ok}})
 
         assert_broadcast("data", %{"game" => :ok})
+      end
+    end
+
+    test "broadcasts metadata when the subscription is invoked" do
+      test_pid = self()
+
+      with_mock Pong,
+        subscribe: fn fun -> send(test_pid, fun) end do
+        socket()
+        |> subscribe_and_join(GameChannel, "game:board")
+
+        PongSubscription.create()
+
+        assert_received fun
+        fun.({"dimensions", %{"something" => "else"}})
+
+        assert_broadcast("dimensions", %{"something" => "else"})
       end
     end
   end

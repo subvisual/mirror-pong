@@ -121,7 +121,8 @@ defmodule Pong.Engine do
   defp players_ready?(state), do: state.player_left && state.player_right
 
   defp start_game(state) do
-    Renderer.start()
+    Renderer.start(state.game)
+
     schedule_work(state.period)
   end
 

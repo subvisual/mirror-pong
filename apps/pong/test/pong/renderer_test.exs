@@ -4,6 +4,7 @@ defmodule Pong.RendererTest do
 
   alias Pong.Renderer
 
+  import Pong.Factory
   import Mock
 
   describe "init/1" do
@@ -21,10 +22,26 @@ defmodule Pong.RendererTest do
   describe "handle_cast/2 for :start messages" do
     test "schedules work" do
       state = build_state()
+      game = build(:game)
 
-      {:noreply, _} = Renderer.handle_cast(:start, state)
+      {:noreply, _} = Renderer.handle_cast({:start, game}, state)
 
       assert_receive :work, 100
+    end
+
+    test "broadcasts the game dimensions" do
+      subscriptions = [fn data -> send self(), data end]
+      state = build_state(subscriptions: subscriptions)
+      game = build(:game)
+
+      {:noreply, _} = Renderer.handle_cast({:start, game}, state)
+
+      assert_receive {"dimensions",
+                      %{
+                        "ball" => _,
+                        "board" => [_, _],
+                        "paddle" => [_, _]
+                      }}
     end
   end
 
@@ -75,13 +92,18 @@ defmodule Pong.RendererTest do
 
   describe "handle_info/2 for :work messages" do
     test "broadcasts the game state to all subscriptions" do
-      with_mock Pong.Engine, state: fn -> :ok end do
+      with_mock Pong.Engine, state: fn -> %{game: build(:game)} end do
         subscriptions = [fn data -> send self(), data end]
         state = build_state(subscriptions: subscriptions)
 
         {:noreply, _} = Renderer.handle_info(:work, state)
 
-        assert_receive :ok
+        assert_receive {"data",
+                        %{
+                          "ball" => [_, _],
+                          "paddle_left" => [_, _],
+                          "paddle_right" => [_, _]
+                        }}
       end
     end
   end

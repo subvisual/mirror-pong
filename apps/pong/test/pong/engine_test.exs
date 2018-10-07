@@ -55,7 +55,7 @@ defmodule Pong.EngineTest do
     end
 
     test "adds the right player if there is a left player" do
-      with_mock Renderer, start: fn -> :ok end do
+      with_mock Renderer, start: fn _ -> :ok end do
         state = build_pong_state(player_left: true)
         {:reply, _, new_state} = Engine.handle_call(:join, self(), state)
 
@@ -64,16 +64,16 @@ defmodule Pong.EngineTest do
     end
 
     test "starts the renderer" do
-      with_mock Renderer, start: fn -> :ok end do
+      with_mock Renderer, start: fn _ -> :ok end do
         state = build_pong_state(player_left: true)
         {:reply, _, _} = Engine.handle_call(:join, self(), state)
 
-        assert called(Renderer.start())
+        assert called(Renderer.start(state.game))
       end
     end
 
     test "schedules work if all players are ready" do
-      with_mock Renderer, start: fn -> :ok end do
+      with_mock Renderer, start: fn _ -> :ok end do
         state = build_pong_state(player_left: true, period: 1)
         {:reply, _, _} = Engine.handle_call(:join, self(), state)
 
