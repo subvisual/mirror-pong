@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Socket } from 'phoenix';
 import _ from 'lodash';
 
-import Board from '../Board';
 import Centered from '../Centered';
+import BoardCountdown from '../BoardCountdown';
 
 export default class BoardRoom extends Component {
   /* eslint react/no-unused-state: 0 */
@@ -18,6 +18,7 @@ export default class BoardRoom extends Component {
       left: null,
       right: null,
     },
+    gameStarting: false,
     loading: true,
   };
   /* eslint react/no-unused-state: 1 */
@@ -32,6 +33,16 @@ export default class BoardRoom extends Component {
     this.joinChannel();
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const oldState = this.state;
+
+    return (
+      oldState.players.left !== nextState.players.left ||
+      oldState.players.right !== nextState.players.right ||
+      oldState.delay !== nextState.delay
+    );
+  }
+
   componentWillUnmount() {
     this.leaveChannel();
   }
@@ -41,11 +52,6 @@ export default class BoardRoom extends Component {
       .join()
       .receive('ok', data => {
         console.log('Joined successfully', data); // eslint-disable-line
-        this.setState({
-          game: { ...data.game },
-          players: { ...data.players },
-          loading: false,
-        });
         this.subscribeToData();
       })
       .receive('error', resp => {
@@ -68,7 +74,15 @@ export default class BoardRoom extends Component {
 
   subscribeToData = () => {
     this.channel.on('data', data => {
-      this.setState({ game: { ...data.game }, players: { ...data.players } });
+      this.setState({
+        game: { ...data.game },
+        players: { ...data.players },
+        loading: false,
+      });
+    });
+
+    this.channel.on('game_starting', data => {
+      this.setState({ delay: data.delay });
     });
   };
 
@@ -80,12 +94,12 @@ export default class BoardRoom extends Component {
 
     if (loading) return null;
 
-    const playersNotAvailable = _.isNil(left) || _.isNil(right);
+    const waitingForPlayers = _.isNil(left) || _.isNil(right);
 
-    if (playersNotAvailable) {
+    if (waitingForPlayers) {
       return <Centered>Currently waiting for players!</Centered>;
     }
 
-    return <Board channel={this.channel} {...this.state} />;
+    return <BoardCountdown channel={this.channel} {...this.state} />;
   }
 }

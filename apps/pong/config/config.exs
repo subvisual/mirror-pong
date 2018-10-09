@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :pong, Pong,
-  fps: 60,
+  fps: 30,
   start_delay: 3_000
 
 config :pong, Pong.Game.Board,
