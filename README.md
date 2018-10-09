@@ -12,6 +12,7 @@ The pong game available at the venue during Mirror Conf 2018.
 
 * [Setup](#setup)
 * [Contribution Guidelines](#contribution-guidelines)
+* [Known Issues](#known-issues)
 * [About](#about)
 
 Setup
@@ -33,6 +34,11 @@ Contribution Guidelines
 -----------------------
 
 Contributions must follow [Subvisual's guides](https://github.com/subvisual/guides).
+
+Known issues
+-----
+
+The game board is laggy in Firefox, and possibly every other browser. Our optimizations currently work best for Google Chrome (or Chromium based browsers).
 
 About
 -----
