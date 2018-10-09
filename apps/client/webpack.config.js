@@ -29,6 +29,25 @@ module.exports = {
           'postcss-loader',
         ],
       },
+      {
+        test: /\.png/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[path][name]-[hash:8].[ext]',
+              publicPath: 'assets/',
+            },
+          },
+        ],
+      },
+      {
+        test: /\.svg/,
+        use: {
+          loader: 'react-svg-loader',
+          options: {},
+        },
+      },
     ],
   },
 

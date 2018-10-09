@@ -4,14 +4,14 @@ import { Stage, Layer } from 'react-konva';
 
 import Ball from '../Ball';
 import Paddle from '../Paddle';
-import RetroText from '../RetroText';
 
-import resizable from '../Resizable';
+import resizable from '../../containers/Resizable';
 
 import positioning from '../../lib/positioning';
 import GameAnimator from '../../lib/gameAnimator';
 
 import './index.css';
+import withBackground from '../../containers/WithBackground';
 
 const paddlePropTypes = PropTypes.shape({
   fill: PropTypes.string.isRequired,
@@ -22,6 +22,7 @@ const paddlePropTypes = PropTypes.shape({
   y: PropTypes.number.isRequired,
 });
 
+@withBackground
 @resizable
 export default class Board extends Component {
   static propTypes = {
@@ -56,14 +57,17 @@ export default class Board extends Component {
   componentDidMount() {
     this.gameAnimator = new GameAnimator({
       layer: this.layerRef,
+      stage: this.stageRef,
       paddleLeft: this.paddleLeftRef,
       paddleRight: this.paddleRightRef,
       ball: this.ballRef,
     });
 
-    const { channel, width, height } = this.props;
+    const { channel } = this.props;
 
     channel.on('data', data => {
+      const { width, height } = this.props;
+
       const newPositions = positioning.repositionGame({
         dimensions: { width, height },
         game: data.game,
@@ -75,11 +79,17 @@ export default class Board extends Component {
     this.gameAnimator.start();
   }
 
+  // Only update when screen width:height changes
+  shouldComponentUpdate(nextProps) {
+    const { width, height } = this.props;
+    const { width: nextWidth, height: nextHeight } = nextProps;
+
+    return width !== nextWidth || height !== nextHeight;
+  }
+
   componentWillUnmount() {
     this.gameAnimator.stop();
   }
-
-  shouldComponentUpdate = () => false;
 
   render() {
     const { game, width, height } = this.props;
@@ -96,14 +106,6 @@ export default class Board extends Component {
             this.layerRef = ref;
           }}
         >
-          <RetroText
-            text="Mirror Conf"
-            x={width / 2}
-            y={height / 2}
-            offsetX={250}
-            opacity={0.7}
-          />
-
           <Paddle
             ref={ref => {
               this.paddleLeftRef = ref && ref.paddleRef;

@@ -1,7 +1,9 @@
 @import '../../settings.css';
 
 .root {
-  background-color: var(--charcoal);
+  z-index: 1;
+
+  background-color: transparent;
 }
 
 .button {
