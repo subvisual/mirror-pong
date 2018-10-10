@@ -50,6 +50,8 @@ defmodule Pong.Engine do
   end
 
   def handle_call(:join, _from, state) do
+    wait_for_next_cycle(state.period + 100)
+
     case add_player(state) do
       {:ok, player_data, new_state} ->
         if players_ready?(new_state), do: prepare_start(state)

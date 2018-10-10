@@ -36,6 +36,8 @@ defmodule Pong.Renderer do
   end
 
   def handle_cast({:start, game, delay}, state) do
+    wait_for_next_render(state.period + 100)
+
     broadcast(
       state.subscriptions,
       {"game_starting", %{"delay" => delay, "game" => game}}
