@@ -8,7 +8,7 @@ defmodule Pong.Game.Ball do
     :speed
   ]
 
-  @default_speed 5
+  @default_speed 2
   @min_vector_value 4
   @max_vector_value 8
 
