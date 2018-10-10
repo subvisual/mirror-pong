@@ -14,7 +14,8 @@ defmodule Pong.RendererTest do
       assert %{
                fps: _,
                period: _,
-               subscriptions: []
+               subscriptions: [],
+               game: nil
              } = state
     end
   end
@@ -73,6 +74,14 @@ defmodule Pong.RendererTest do
 
       assert_receive :checkpoint_2, 100
     end
+
+    test "resets the game state cache" do
+      state = build_state()
+
+      {:noreply, new_state} = Renderer.handle_cast(:stop, state)
+
+      refute new_state.game
+    end
   end
 
   describe "handle_cast/2 for :subscribe messages" do
@@ -99,11 +108,31 @@ defmodule Pong.RendererTest do
     end
   end
 
+  describe "handle_call/3 for :current_state messages" do
+    test "errors if the game hasn't started" do
+      state = build_state(game: nil)
+
+      {:reply, reply, _} = Renderer.handle_call(:current_state, self(), state)
+
+      assert {:error, :not_started} = reply
+    end
+
+    test "returns the game if it has started" do
+      game = build(:game)
+      state = build_state(game: game)
+
+      {:reply, reply, _} = Renderer.handle_call(:current_state, self(), state)
+
+      assert {:ok, ^game} = reply
+    end
+  end
+
   defp build_state(overrides \\ []) do
     [
       fps: 60,
       period: Kernel.trunc(1 / 60 * 1_000),
-      subscriptions: []
+      subscriptions: [],
+      game: nil
     ]
     |> Keyword.merge(overrides)
     |> Enum.into(%{})

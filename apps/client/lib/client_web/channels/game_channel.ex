@@ -9,6 +9,16 @@ defmodule ClientWeb.Channels.GameChannel do
     {:ok, socket}
   end
 
+  def join("game:metadata", _params, socket) do
+    case Pong.current_state() do
+      {:ok, game} ->
+        {:ok, %{game: game}, socket}
+
+      {:error, :not_started} ->
+        {:ok, socket}
+    end
+  end
+
   def join("game:play", _params, socket) do
     case Pong.join() do
       {:ok, %{player_id: player_id} = player_data} ->

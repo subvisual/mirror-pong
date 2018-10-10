@@ -8,18 +8,8 @@ import BoardCountdown from '../BoardCountdown';
 export default class BoardRoom extends Component {
   /* eslint react/no-unused-state: 0 */
   state = {
-    game: {
-      ball: null,
-      board: null,
-      paddle_left: null,
-      paddle_right: null,
-    },
-    players: {
-      left: null,
-      right: null,
-    },
-    gameStarting: false,
-    loading: true,
+    game: null,
+    delay: null,
   };
   /* eslint react/no-unused-state: 1 */
 
@@ -29,18 +19,8 @@ export default class BoardRoom extends Component {
     this.socket = new Socket('/socket');
 
     this.socket.connect();
-    this.channel = this.socket.channel('game:board');
+    this.channel = this.socket.channel('game:metadata');
     this.joinChannel();
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    const oldState = this.state;
-
-    return (
-      oldState.players.left !== nextState.players.left ||
-      oldState.players.right !== nextState.players.right ||
-      oldState.delay !== nextState.delay
-    );
   }
 
   componentWillUnmount() {
@@ -51,8 +31,12 @@ export default class BoardRoom extends Component {
     this.channel
       .join()
       .receive('ok', data => {
-        console.log('Joined successfully', data); // eslint-disable-line
-        this.subscribeToData();
+        console.log('Joined successfully'); // eslint-disable-line
+        this.subscribeToMetadata();
+
+        if (data.game) {
+          this.setState({ game: data.game });
+        }
       })
       .receive('error', resp => {
         console.log('Unable to join', resp); // eslint-disable-line
@@ -72,34 +56,19 @@ export default class BoardRoom extends Component {
       });
   };
 
-  subscribeToData = () => {
-    this.channel.on('data', data => {
-      this.setState({
-        game: { ...data.game },
-        players: { ...data.players },
-        loading: false,
-      });
-    });
-
+  subscribeToMetadata = () => {
     this.channel.on('game_starting', data => {
-      this.setState({ delay: data.delay });
+      this.setState({ delay: data.delay, game: data.game });
     });
   };
 
   render() {
-    const {
-      loading,
-      players: { left, right },
-    } = this.state;
+    const { game, delay } = this.state;
 
-    if (loading) return null;
-
-    const waitingForPlayers = _.isNil(left) || _.isNil(right);
-
-    if (waitingForPlayers) {
+    if (_.isNil(game)) {
       return <Centered>Currently waiting for players!</Centered>;
     }
 
-    return <BoardCountdown channel={this.channel} {...this.state} />;
+    return <BoardCountdown delay={delay} {...this.props} game={game} />;
   }
 }

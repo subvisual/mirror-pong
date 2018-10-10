@@ -17,39 +17,44 @@ export default class BoardCountdown extends Component {
     gameStarted: false,
   };
 
-  timeElapsed = 0;
+  constructor(props) {
+    super(props);
 
-  componentDidMount() {
+    const { delay } = props;
+
+    if (delay) {
+      this.iterations = delay / 1000;
+    }
+  }
+
+  componentWillMount() {
     const { delay } = this.props;
 
     if (!delay) {
       this.setState({ gameStarted: true });
-    }
-
-    if (delay && !this.interval) {
-      this.interval = setInterval(this.countdown, 1000);
+    } else {
+      // leave a margin for transmission and processing deltas
+      this.interval = setInterval(this.countdown, 750);
     }
   }
 
   countdown = () => {
-    const { delay } = this.props;
+    if (this.iterations > 1) {
+      this.iterations -= 1;
 
-    if (this.timeElapsed === delay) {
+      document.getElementById('timeRemaining').innerHTML = ` ${
+        this.iterations
+      } seconds`;
+    } else {
       clearInterval(this.interval);
 
       this.interval = null;
 
       this.setState({ gameStarted: true }); // eslint-disable-line
-    } else {
-      this.timeElapsed += 1000;
-
-      document.getElementById('timeRemaining').innerHTML = ` ${delay -
-        this.timeElapsed}`;
     }
   };
 
   render() {
-    const { delay } = this.props;
     const { gameStarted } = this.state;
 
     if (!gameStarted) {
@@ -57,7 +62,7 @@ export default class BoardCountdown extends Component {
         <Centered>
           <p>
             Game starting in
-            <span id="timeRemaining">{` ${delay}`}</span>
+            <span id="timeRemaining">{` ${this.iterations} seconds`}</span>
           </p>
         </Centered>
       );

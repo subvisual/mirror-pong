@@ -23,6 +23,10 @@ defmodule Pong.Renderer do
     GenServer.cast(__MODULE__, :stop)
   end
 
+  def current_state do
+    GenServer.call(__MODULE__, :current_state)
+  end
+
   def init(:ok) do
     {:ok, default_state()}
   end
@@ -45,16 +49,26 @@ defmodule Pong.Renderer do
   def handle_cast(:stop, state) do
     wait_for_next_render(state.period + 100)
 
-    {:noreply, state}
+    {:noreply, %{state | game: nil}}
+  end
+
+  def handle_call(:current_state, _from, state) do
+    reply =
+      case state.game do
+        nil -> {:error, :not_started}
+        game -> {:ok, game}
+      end
+
+    {:reply, reply, state}
   end
 
   def handle_info(:work, state) do
-    game_state = Pong.Engine.state()
-    broadcast(state.subscriptions, {"data", game_state})
+    game = Pong.Engine.state()
+    broadcast(state.subscriptions, {"data", game})
 
     schedule_work(state.period)
 
-    {:noreply, state}
+    {:noreply, %{state | game: game}}
   end
 
   defp broadcast(subscriptions, game) do
@@ -79,7 +93,8 @@ defmodule Pong.Renderer do
     %{
       fps: fps,
       period: Kernel.trunc(1 / fps * 1_000),
-      subscriptions: []
+      subscriptions: [],
+      game: nil
     }
   end
 

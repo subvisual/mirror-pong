@@ -22,6 +22,10 @@ defmodule Client.GameTest do
         socket()
         |> subscribe_and_join(GameChannel, "game:board")
 
+      {:ok, _, _metadata_socket} =
+        socket()
+        |> subscribe_and_join(GameChannel, "game:metadata")
+
       {:ok, _, controller_socket} =
         socket()
         |> subscribe_and_join(GameChannel, "game:play")
@@ -34,9 +38,9 @@ defmodule Client.GameTest do
 
       push(controller_socket, "player:move", %{"direction" => "up"})
 
-      assert_broadcast("data", data, 200)
+      assert_broadcast("data", game, 200)
 
-      assert data.game.paddle_left.y > initial_state.game.paddle_left.y
+      assert game.paddle_left.y > initial_state.paddle_left.y
     end
   end
 end

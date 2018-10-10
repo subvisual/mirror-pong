@@ -5,13 +5,13 @@ import { Stage, Layer } from 'react-konva';
 import Ball from '../Ball';
 import Paddle from '../Paddle';
 
+import withBackground from '../../containers/WithBackground';
 import resizable from '../../containers/Resizable';
 
-import positioning from '../../lib/positioning';
 import GameAnimator from '../../lib/gameAnimator';
+import positioning from '../../lib/positioning';
 
 import './index.css';
-import withBackground from '../../containers/WithBackground';
 
 const paddlePropTypes = PropTypes.shape({
   fill: PropTypes.string.isRequired,
@@ -26,12 +26,8 @@ const paddlePropTypes = PropTypes.shape({
 @resizable
 export default class Board extends Component {
   static propTypes = {
-    channel: PropTypes.shape({
-      push: PropTypes.func.isRequired,
-    }).isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    paddleMargin: PropTypes.number,
     game: PropTypes.shape({
       ball: PropTypes.shape({
         radius: PropTypes.number.isRequired,
@@ -50,30 +46,17 @@ export default class Board extends Component {
     }).isRequired,
   };
 
-  static defaultProps = {
-    paddleMargin: 50,
-  };
-
   componentDidMount() {
+    const { width, height } = this.props;
+
     this.gameAnimator = new GameAnimator({
       layer: this.layerRef,
       stage: this.stageRef,
       paddleLeft: this.paddleLeftRef,
       paddleRight: this.paddleRightRef,
       ball: this.ballRef,
-    });
-
-    const { channel } = this.props;
-
-    channel.on('data', data => {
-      const { width, height } = this.props;
-
-      const newPositions = positioning.repositionGame({
-        dimensions: { width, height },
-        game: data.game,
-      });
-
-      this.gameAnimator.setPositions(newPositions);
+      width,
+      height,
     });
 
     this.gameAnimator.start();
@@ -85,6 +68,12 @@ export default class Board extends Component {
     const { width: nextWidth, height: nextHeight } = nextProps;
 
     return width !== nextWidth || height !== nextHeight;
+  }
+
+  componentDidUpdate() {
+    const { width, height } = this.props;
+
+    this.gameAnimator.setDimensions(width, height);
   }
 
   componentWillUnmount() {

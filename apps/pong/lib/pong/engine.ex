@@ -68,12 +68,7 @@ defmodule Pong.Engine do
   end
 
   def handle_call(:state, _from, state) do
-    game_state = %{
-      game: state.game,
-      players: %{left: state.player_left, right: state.player_right}
-    }
-
-    {:reply, game_state, state}
+    {:reply, state.game, state}
   end
 
   def handle_call(:stop, _from, _state) do

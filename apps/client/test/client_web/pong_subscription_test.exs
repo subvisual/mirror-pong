@@ -40,16 +40,17 @@ defmodule ClientWeb.PongSubscriptionTest do
       test_pid = self()
 
       with_mock Pong,
-        subscribe: fn fun -> send(test_pid, fun) end do
+        subscribe: fn fun -> send(test_pid, fun) end,
+        current_state: fn -> {:error, :not_started} end do
         socket()
-        |> subscribe_and_join(GameChannel, "game:board")
+        |> subscribe_and_join(GameChannel, "game:metadata")
 
         PongSubscription.create()
 
         assert_received fun
-        fun.({"dimensions", %{"something" => "else"}})
+        fun.({"game_starting", %{"delay" => "3000"}})
 
-        assert_broadcast("dimensions", %{"something" => "else"})
+        assert_broadcast("game_starting", %{"delay" => "3000"})
       end
     end
   end

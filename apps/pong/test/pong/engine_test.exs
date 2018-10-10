@@ -158,7 +158,7 @@ defmodule Pong.EngineTest do
   describe "handle_call/3 for :state messages" do
     test "returns the game state" do
       state = build_pong_state()
-      game_state = %{game: state.game, players: %{left: nil, right: nil}}
+      game_state = state.game
 
       assert {:reply, ^game_state, ^state} =
                Engine.handle_call(:state, self(), state)

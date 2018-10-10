@@ -8,6 +8,6 @@ defmodule ClientWeb.PongSubscription do
   end
 
   defp broadcast({event, data}) do
-    ClientWeb.Endpoint.broadcast("game:board", event, data)
+    ClientWeb.Endpoint.broadcast("game:metadata", event, data)
   end
 end
