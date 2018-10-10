@@ -58,10 +58,25 @@ module.exports = {
     }),
   ],
 
-  output: {
-    path: path.join(__dirname, '/priv/static/assets'),
-    publicPath: '/assets',
+  devServer: {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+    stats: {
+      children: false,
+    },
   },
+
+  output:
+    process.env.NODE_ENV === 'production'
+      ? {
+          path: path.join(__dirname, '/priv/static/assets'),
+          publicPath: '/assets',
+        }
+      : {
+          path: path.resolve(__dirname, 'public'),
+          publicPath: 'http://localhost:8080/assets',
+        },
 
   resolve: {
     extensions: ['.js', '.jsx', '.json', '.css', '.scss'],
