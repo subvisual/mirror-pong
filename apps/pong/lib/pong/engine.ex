@@ -28,8 +28,8 @@ defmodule Pong.Engine do
     GenServer.call(__MODULE__, :stop)
   end
 
-  def state do
-    GenServer.call(__MODULE__, :state)
+  def consume do
+    GenServer.call(__MODULE__, :consume)
   end
 
   def move(player, direction) do
@@ -66,11 +66,19 @@ defmodule Pong.Engine do
   def handle_call({:leave, player_id}, _from, state) do
     wait_for_next_cycle(state.period + 100)
 
-    {:reply, :ok, remove_player(player_id, state)}
+    new_state =
+      state
+      |> remove_player(player_id)
+      |> push_event({"player_left", player_id})
+
+    {:reply, :ok, new_state}
   end
 
-  def handle_call(:state, _from, state) do
-    {:reply, state.game, state}
+  def handle_call(:consume, _from, state) do
+    reply = {state.game, state.events}
+    new_state = %{state | events: []}
+
+    {:reply, reply, new_state}
   end
 
   def handle_call(:stop, _from, _state) do
@@ -112,9 +120,9 @@ defmodule Pong.Engine do
 
   defp add_player(_), do: {:error, :game_full}
 
-  defp remove_player(:left, state), do: %{state | player_left: nil}
-  defp remove_player(:right, state), do: %{state | player_right: nil}
-  defp remove_player(_, state), do: state
+  defp remove_player(state, :left), do: %{state | player_left: nil}
+  defp remove_player(state, :right), do: %{state | player_right: nil}
+  defp remove_player(state, _), do: state
 
   defp players_ready?(state), do: state.player_left && state.player_right
 
@@ -122,6 +130,10 @@ defmodule Pong.Engine do
     Renderer.start(game, start_delay)
 
     schedule_work(start_delay)
+  end
+
+  defp push_event(%{events: events} = state, event) do
+    %{state | events: events ++ [event]}
   end
 
   defp default_state do
@@ -135,7 +147,8 @@ defmodule Pong.Engine do
       start_delay: start_delay,
       player_left: nil,
       player_right: nil,
-      movements: Movement.Buffer.new()
+      movements: Movement.Buffer.new(),
+      events: []
     }
   end
 

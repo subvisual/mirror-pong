@@ -45,7 +45,7 @@
         # Refactor
 
         {Credo.Check.Refactor.ABCSize, exit_status: 0},
-        {Credo.Check.Refactor.AppendSingleItem},
+        {Credo.Check.Refactor.AppendSingleItem, false},
         {Credo.Check.Refactor.DoubleBooleanNegation},
         {Credo.Check.Refactor.CondStatements, false},
         {Credo.Check.Refactor.CyclomaticComplexity},

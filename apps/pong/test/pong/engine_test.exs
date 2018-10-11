@@ -116,10 +116,22 @@ defmodule Pong.EngineTest do
     end
 
     test "ignores changes if the player id is invalid" do
-      state = build_pong_state(player_right: true)
+      state = build_pong_state(player_right: true, player_left: true)
 
-      assert {:reply, :ok, ^state} =
+      assert {:reply, :ok, new_state} =
                Engine.handle_call({:leave, :fake_id}, self(), state)
+
+      assert new_state.player_left
+      assert new_state.player_right
+    end
+
+    test "adds an event if a player leaves" do
+      state = build_pong_state(player_right: true, player_left: true)
+
+      assert {:reply, :ok, new_state} =
+               Engine.handle_call({:leave, :right}, self(), state)
+
+      assert new_state.events == [{"player_left", :right}]
     end
 
     test "waits for the pending cycle" do
@@ -155,13 +167,13 @@ defmodule Pong.EngineTest do
     end
   end
 
-  describe "handle_call/3 for :state messages" do
-    test "returns the game state" do
-      state = build_pong_state()
-      game_state = state.game
+  describe "handle_call/3 for :consume messages" do
+    test "returns the game state and any pending events" do
+      state = build_pong_state(events: [{"one", "event"}])
+      reset_state = %{state | events: []}
 
-      assert {:reply, ^game_state, ^state} =
-               Engine.handle_call(:state, self(), state)
+      assert {:reply, {state.game, [{"one", "event"}]}, reset_state} ==
+               Engine.handle_call(:consume, self(), state)
     end
   end
 
@@ -238,7 +250,8 @@ defmodule Pong.EngineTest do
       start_delay: 100,
       player_left: nil,
       player_right: nil,
-      movements: Movement.Buffer.new()
+      movements: Movement.Buffer.new(),
+      events: []
     ]
     |> Keyword.merge(overrides)
     |> Enum.into(%{})

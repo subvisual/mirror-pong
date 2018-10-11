@@ -16,7 +16,7 @@ defmodule Client.GameTest do
 
   describe "gameplay" do
     test "updates watchers on every move" do
-      initial_state = Pong.Engine.state()
+      {initial_state, []} = Pong.Engine.consume()
 
       {:ok, _, _game_socket} =
         socket()

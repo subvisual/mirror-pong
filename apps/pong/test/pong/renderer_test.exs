@@ -97,13 +97,24 @@ defmodule Pong.RendererTest do
 
   describe "handle_info/2 for :work messages" do
     test "broadcasts the game state to all subscriptions" do
-      with_mock Pong.Engine, state: fn -> :ok end do
+      with_mock Pong.Engine, consume: fn -> {:ok, []} end do
         subscriptions = [fn data -> send self(), data end]
         state = build_state(subscriptions: subscriptions)
 
         {:noreply, _} = Renderer.handle_info(:work, state)
 
         assert_receive {"data", :ok}
+      end
+    end
+
+    test "broadcasts the events to all subscriptions" do
+      with_mock Pong.Engine, consume: fn -> {:ok, [{"player_left", :right}]} end do
+        subscriptions = [fn data -> send self(), data end]
+        state = build_state(subscriptions: subscriptions)
+
+        {:noreply, _} = Renderer.handle_info(:work, state)
+
+        assert_receive {"player_left", :right}
       end
     end
   end
