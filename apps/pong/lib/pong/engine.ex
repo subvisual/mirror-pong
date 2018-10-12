@@ -91,13 +91,21 @@ defmodule Pong.Engine do
   end
 
   def handle_info(:work, %{game: game, movements: movements} = state) do
+    {events, updated_game} = Movement.apply_to(game, movements)
+
     new_state = %{
       state
-      | game: Movement.apply_to(game, movements),
-        movements: Movement.Buffer.new()
+      | game: updated_game,
+        movements: Movement.Buffer.new(),
+        events: events ++ state.events
     }
 
-    schedule_work(new_state.period)
+    delay =
+      if player_scored?(events),
+        do: new_state.start_delay,
+        else: new_state.period
+
+    schedule_work(delay)
 
     {:noreply, new_state}
   end
@@ -127,6 +135,12 @@ defmodule Pong.Engine do
   defp remove_player(state, _), do: state
 
   defp players_ready?(state), do: state.player_left && state.player_right
+
+  defp player_scored?(events) do
+    Enum.find(events, false, fn {event, _} ->
+      event == "player_scored"
+    end)
+  end
 
   defp prepare_start(%{game: game, start_delay: start_delay}) do
     Renderer.start(game, start_delay)

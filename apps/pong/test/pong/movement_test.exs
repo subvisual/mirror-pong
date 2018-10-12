@@ -15,7 +15,7 @@ defmodule Pong.MovementTest do
       %Game{paddle_left: paddle} = game = build(:game)
       buffer = build(:movement_buffer, left: %{up: 1, down: 0})
 
-      %Game{paddle_left: updated_paddle} = Movement.apply_to(game, buffer)
+      {_, %Game{paddle_left: updated_paddle}} = Movement.apply_to(game, buffer)
 
       assert updated_paddle.y > paddle.y
     end
@@ -24,7 +24,7 @@ defmodule Pong.MovementTest do
       %Game{paddle_left: paddle} = game = build(:game)
       buffer = build(:movement_buffer, left: %{up: 0, down: 1})
 
-      %Game{paddle_left: updated_paddle} = Movement.apply_to(game, buffer)
+      {_, %Game{paddle_left: updated_paddle}} = Movement.apply_to(game, buffer)
 
       assert updated_paddle.y < paddle.y
     end
@@ -36,7 +36,7 @@ defmodule Pong.MovementTest do
       game = build(:game, paddle_left: paddle, board: board)
       buffer = build(:movement_buffer, left: %{up: 1, down: 0})
 
-      %Game{paddle_left: updated_paddle} = Movement.apply_to(game, buffer)
+      {_, %Game{paddle_left: updated_paddle}} = Movement.apply_to(game, buffer)
 
       assert updated_paddle.y == board.height - 50
     end
@@ -48,7 +48,7 @@ defmodule Pong.MovementTest do
       game = build(:game, paddle_left: paddle, board: board)
       buffer = build(:movement_buffer, left: %{up: 0, down: 1})
 
-      %Game{paddle_left: updated_paddle} = Movement.apply_to(game, buffer)
+      {_, %Game{paddle_left: updated_paddle}} = Movement.apply_to(game, buffer)
 
       assert updated_paddle.y == 50
     end
@@ -58,7 +58,7 @@ defmodule Pong.MovementTest do
       ball = build(:ball, vector_x: 1, vector_y: -1, speed: 2)
       game = build(:game, ball: ball)
 
-      %Game{ball: %Ball{x: x, y: y}} = Movement.apply_to(game, buffer)
+      {_, %Game{ball: %Ball{x: x, y: y}}} = Movement.apply_to(game, buffer)
 
       assert x == ball.x + 2
       assert y == ball.y - 2
@@ -72,67 +72,47 @@ defmodule Pong.MovementTest do
       top_wall_ball =
         build(:ball, radius: 5, y: board.height - 6, vector_y: 1, speed: 1)
 
-      right_wall_ball =
-        build(:ball, radius: 5, x: board.width - 6, vector_x: 1, speed: 1)
-
       bottom_wall_ball = build(:ball, radius: 5, y: 6, vector_y: -1, speed: 1)
-      left_wall_ball = build(:ball, radius: 5, x: 6, vector_x: -1, speed: 1)
 
       game = build(:game, board: board)
 
-      %Game{ball: %Ball{y: top_wall_ball_y}} =
+      {_, %Game{ball: %Ball{y: top_wall_ball_y}}} =
         Movement.apply_to(%{game | ball: top_wall_ball}, buffer)
 
-      %Game{ball: %Ball{x: right_wall_ball_x}} =
-        Movement.apply_to(%{game | ball: right_wall_ball}, buffer)
-
-      %Game{ball: %Ball{y: bottom_wall_ball_y}} =
+      {_, %Game{ball: %Ball{y: bottom_wall_ball_y}}} =
         Movement.apply_to(%{game | ball: bottom_wall_ball}, buffer)
 
-      %Game{ball: %Ball{x: left_wall_ball_x}} =
-        Movement.apply_to(%{game | ball: left_wall_ball}, buffer)
-
       assert top_wall_ball_y == board.height - top_wall_ball.radius
-      assert right_wall_ball_x == board.height - right_wall_ball.radius
       assert bottom_wall_ball_y == bottom_wall_ball.radius
-      assert left_wall_ball_x == left_wall_ball.radius
     end
 
     test "updates the ball vector when colliding with the wall" do
       buffer = build(:movement_buffer)
       board = build(:board)
-      # move the paddles out of the way
-      paddle = build(:paddle, x: -100, y: -100)
 
       # all balls are 1 unit away from their respective wall
       top_wall_ball =
-        build(:ball, radius: 5, y: board.height - 6, vector_y: 1, speed: 1)
+        build(:ball,
+          radius: 5,
+          x: board.width / 2,
+          y: board.height - 6,
+          vector_y: 1,
+          speed: 1
+        )
 
-      right_wall_ball =
-        build(:ball, radius: 5, x: board.width - 6, vector_x: 1, speed: 1)
+      bottom_wall_ball =
+        build(:ball, radius: 5, x: board.width / 2, y: 6, vector_y: -1, speed: 1)
 
-      bottom_wall_ball = build(:ball, radius: 5, y: 6, vector_y: -1, speed: 1)
-      left_wall_ball = build(:ball, radius: 5, x: 6, vector_x: -1, speed: 1)
+      game = build(:game, board: board)
 
-      game =
-        build(:game, board: board, paddle_left: paddle, paddle_right: paddle)
-
-      %Game{ball: %Ball{vector_y: top_wall_vector_y}} =
+      {_, %Game{ball: %Ball{vector_y: top_wall_vector_y}}} =
         Movement.apply_to(%{game | ball: top_wall_ball}, buffer)
 
-      %Game{ball: %Ball{vector_x: right_wall_vector_x}} =
-        Movement.apply_to(%{game | ball: right_wall_ball}, buffer)
-
-      %Game{ball: %Ball{vector_y: bottom_wall_vector_y}} =
+      {_, %Game{ball: %Ball{vector_y: bottom_wall_vector_y}}} =
         Movement.apply_to(%{game | ball: bottom_wall_ball}, buffer)
 
-      %Game{ball: %Ball{vector_x: left_wall_vector_x}} =
-        Movement.apply_to(%{game | ball: left_wall_ball}, buffer)
-
       assert top_wall_vector_y == -top_wall_ball.vector_y
-      assert right_wall_vector_x == -right_wall_ball.vector_x
       assert bottom_wall_vector_y == -bottom_wall_ball.vector_y
-      assert left_wall_vector_x == -left_wall_ball.vector_x
     end
 
     test "updates the ball vector when colliding with the paddles" do
@@ -141,7 +121,7 @@ defmodule Pong.MovementTest do
       left_paddle = build(:paddle, x: 30, y: board.height / 2)
       right_paddle = build(:paddle, x: board.width - 30, y: board.height / 2)
 
-      # bothh balls are 1 unit away from their respective paddle
+      # both balls are 1 unit away from their respective paddle
       leftside_ball =
         build(:ball,
           radius: 5,
@@ -169,14 +149,54 @@ defmodule Pong.MovementTest do
           paddle_right: right_paddle
         )
 
-      %Game{ball: updated_leftside_ball} =
+      {_, %Game{ball: updated_leftside_ball}} =
         Movement.apply_to(%{game | ball: leftside_ball}, buffer)
 
-      %Game{ball: updated_rightside_ball} =
+      {_, %Game{ball: updated_rightside_ball}} =
         Movement.apply_to(%{game | ball: rightside_ball}, buffer)
 
       assert updated_leftside_ball.vector_x == -leftside_ball.vector_x
       assert updated_rightside_ball.vector_x == -rightside_ball.vector_x
+    end
+
+    test "updates the left player score when the ball is past the left paddle" do
+      # move the paddle out of the way
+      paddle = build(:left_paddle, y: 50, height: 100)
+      # ball is one unit away from being past the left paddle
+      ball_x = paddle.x - paddle.width / 2 + 1
+      ball = build(:ball, x: ball_x, speed: 10, vector_x: -1, vector_y: 0)
+      game = build(:game, paddle_left: paddle, ball: ball)
+      buffer = build(:movement_buffer)
+
+      {_, updated_game} = Movement.apply_to(game, buffer)
+
+      assert updated_game.score_left > game.score_left
+    end
+
+    test "updates the right player score when the ball is past the right paddle" do
+      # move the paddle out of the way
+      paddle = build(:right_paddle, y: 50, height: 100)
+      # ball is one unit away from being past the right paddle
+      ball_x = paddle.x + paddle.width / 2 - 1
+      ball = build(:ball, x: ball_x, speed: 10, vector_x: 1, vector_y: 0)
+      game = build(:game, paddle_right: paddle, ball: ball)
+      buffer = build(:movement_buffer)
+
+      {_, updated_game} = Movement.apply_to(game, buffer)
+
+      assert updated_game.score_right > game.score_right
+    end
+
+    test "returns an event if a player scored" do
+      # move the paddle out of the way
+      paddle = build(:right_paddle, y: 50, height: 100)
+      # ball is one unit away from being past the right paddle
+      ball_x = paddle.x + paddle.width / 2 - 1
+      ball = build(:ball, x: ball_x, speed: 10, vector_x: 1, vector_y: 0)
+      game = build(:game, paddle_right: paddle, ball: ball)
+      buffer = build(:movement_buffer)
+
+      assert {[{"player_scored", _} | _], _} = Movement.apply_to(game, buffer)
     end
   end
 end

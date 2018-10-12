@@ -15,7 +15,9 @@ defmodule Pong.Factory do
       ball: build(:ball),
       board: build(:board),
       paddle_left: build(:left_paddle),
-      paddle_right: build(:right_paddle)
+      paddle_right: build(:right_paddle),
+      score_left: 0,
+      score_right: 0
     }
   end
 

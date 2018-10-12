@@ -9,12 +9,20 @@ defmodule Pong.Movement do
 
   alias Pong.Movement.Buffer
 
+  @type event :: {String.t(), map()}
+
   @doc """
   Applies the buffer movements to the paddles and computes all new positions
   resulting of the ball movement and collisions.
   """
-  @spec apply_to(Game.t(), Buffer.t()) :: Game.t()
+  @spec apply_to(Game.t(), Buffer.t()) :: {[event()], Game.t()}
   def apply_to(%Game{} = game, %Buffer{} = buffer) do
+    game
+    |> apply_movement(buffer)
+    |> apply_score()
+  end
+
+  defp apply_movement(game, buffer) do
     %{
       ball: ball,
       board: board,
@@ -44,6 +52,30 @@ defmodule Pong.Movement do
         paddle_left: updated_paddle_left,
         paddle_right: updated_paddle_right
     }
+  end
+
+  defp apply_score(game) do
+    cond do
+      ball_passed_left_paddle?(game.ball, game.paddle_left) ->
+        update_score(game, :left)
+
+      ball_passed_right_paddle?(game.ball, game.paddle_right) ->
+        update_score(game, :right)
+
+      true ->
+        {[], game}
+    end
+  end
+
+  defp update_score(game, ref) do
+    updated_game = Game.score(game, ref)
+
+    payload = %{
+      score_left: updated_game.score_left,
+      score_right: updated_game.score_right
+    }
+
+    {[{"player_scored", payload}], updated_game}
   end
 
   defp apply_paddle_movements(paddle, movements, board) do
@@ -119,5 +151,19 @@ defmodule Pong.Movement do
     left_limit = ball.x - ball.radius
 
     right_limit >= board.width or left_limit <= 0
+  end
+
+  defp ball_passed_left_paddle?(ball, paddle) do
+    rightmost_ball_x = ball.x + ball.radius
+    leftmost_paddle_x = paddle.x - paddle.width / 2
+
+    rightmost_ball_x < leftmost_paddle_x
+  end
+
+  defp ball_passed_right_paddle?(ball, paddle) do
+    leftmost_ball_x = ball.x - ball.radius
+    rightmost_paddle_x = paddle.x + paddle.width / 2
+
+    leftmost_ball_x > rightmost_paddle_x
   end
 end

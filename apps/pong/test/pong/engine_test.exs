@@ -222,7 +222,7 @@ defmodule Pong.EngineTest do
     end
 
     test "applies the movements to the game" do
-      with_mock Movement, apply_to: fn _, _ -> :ok end do
+      with_mock Movement, apply_to: fn _, _ -> {[], :ok} end do
         state = build_pong_state(player_left: true, player_right: true)
 
         {:noreply, _} = Engine.handle_info(:work, state)
@@ -232,12 +232,42 @@ defmodule Pong.EngineTest do
     end
 
     test "resets the movement buffer" do
-      with_mock Movement, apply_to: fn _, _ -> :ok end do
+      with_mock Movement, apply_to: fn _, _ -> {[], :ok} end do
         state = build_pong_state(player_left: true, player_right: true)
 
         {:noreply, new_state} = Engine.handle_info(:work, state)
 
         assert new_state.movements == Movement.Buffer.new()
+      end
+    end
+
+    test "updates the game events" do
+      mock_apply_to = fn game, _ -> {[{"a new", "event"}], game} end
+
+      with_mock Movement, apply_to: mock_apply_to do
+        state = build_pong_state(player_left: true, player_right: true)
+
+        {:noreply, new_state} = Engine.handle_info(:work, state)
+
+        assert new_state.events == [{"a new", "event"}]
+      end
+    end
+
+    test "uses the start delay if there was a point scored" do
+      mock_apply_to = fn game, _ -> {[{"player_scored", %{}}], game} end
+
+      with_mock Movement, apply_to: mock_apply_to do
+        state =
+          build_pong_state(
+            player_left: true,
+            player_right: true,
+            start_delay: 1,
+            period: 1_000
+          )
+
+        {:noreply, _} = Engine.handle_info(:work, state)
+
+        assert_receive :work
       end
     end
   end
