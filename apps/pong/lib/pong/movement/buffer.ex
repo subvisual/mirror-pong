@@ -2,11 +2,25 @@ defmodule Pong.Movement.Buffer do
   defstruct left: %{up: 0, down: 0},
             right: %{up: 0, down: 0}
 
-  @type t :: %__MODULE__{}
+  @type counter :: %{
+          up: integer(),
+          down: integer()
+        }
+
+  @type t :: %__MODULE__{
+          left: counter(),
+          right: counter()
+        }
+
+  @type default :: %__MODULE__{
+          left: %{up: 0, down: 0},
+          right: %{up: 0, down: 0}
+        }
+
   @type tag :: :left | :right
   @type event :: :up | :down
 
-  @spec new :: t()
+  @spec new :: default()
   def new do
     %__MODULE__{}
   end

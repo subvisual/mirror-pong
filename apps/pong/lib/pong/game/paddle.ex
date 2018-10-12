@@ -10,10 +10,27 @@ defmodule Pong.Game.Paddle do
 
   import Pong.Config, only: [config!: 2]
 
-  @type t :: %__MODULE__{}
-  @type direction :: :up | :down
-
   @default_speed 5
+
+  @type t :: %__MODULE__{
+          x: integer(),
+          y: integer(),
+          speed: integer(),
+          width: integer(),
+          height: integer(),
+          fill: String.t()
+        }
+
+  @type default :: %__MODULE__{
+          x: integer(),
+          y: integer(),
+          speed: 5,
+          width: integer(),
+          height: integer(),
+          fill: String.t()
+        }
+
+  @type direction :: :up | :down
 
   @spec new(keyword()) :: t()
   def new(args) do
@@ -41,7 +58,7 @@ defmodule Pong.Game.Paddle do
     }
   end
 
-  @spec random_fills(integer()) :: String.t()
+  @spec random_fills(integer()) :: [String.t()]
   def random_fills(n) do
     config!(__MODULE__, :fills)
     |> Enum.shuffle()
@@ -51,11 +68,11 @@ defmodule Pong.Game.Paddle do
   @spec random_fill :: String.t()
   def random_fill, do: random_fills(1) |> List.first()
 
-  @spec apply_vector(t(), direction) :: t()
+  @spec apply_vector(t(), :up) :: t()
   def apply_vector(%__MODULE__{y: y} = paddle, :up),
     do: %{paddle | y: y + @default_speed}
 
-  @spec apply_vector(t(), direction) :: t()
+  @spec apply_vector(t(), :down) :: t()
   def apply_vector(%__MODULE__{y: y} = paddle, :down),
     do: %{paddle | y: y - @default_speed}
 

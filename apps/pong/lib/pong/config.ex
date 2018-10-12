@@ -12,14 +12,14 @@ defmodule Pong.Config do
     end
   end
 
-  @spec config(:atom, String.t(), term()) :: term()
+  @spec config(atom(), atom(), any()) :: any()
   def config(mod, key, default \\ nil) do
     Application.get_env(:pong, mod, [])
     |> Keyword.get(key, default)
     |> parse_config_value()
   end
 
-  @spec config(:atom, String.t()) :: term() | no_return
+  @spec config(atom(), atom()) :: any() | no_return
   def config!(mod, key) do
     Application.get_env(:pong, mod)
     |> parse_app_env!(key)

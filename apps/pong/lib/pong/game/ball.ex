@@ -12,11 +12,27 @@ defmodule Pong.Game.Ball do
   @min_vector_value 4
   @max_vector_value 8
 
-  @type t :: %__MODULE__{}
+  @type t :: %__MODULE__{
+          x: integer(),
+          y: integer(),
+          vector_x: float(),
+          vector_y: float(),
+          radius: integer(),
+          speed: integer()
+        }
+
+  @type default :: %__MODULE__{
+          x: integer(),
+          y: integer(),
+          vector_x: float(),
+          vector_y: float(),
+          radius: integer(),
+          speed: 2
+        }
 
   import Pong.Config, only: [config!: 2]
 
-  @spec new() :: t()
+  @spec new() :: default()
   def new do
     start_x = config!(__MODULE__, :start_x)
     start_y = config!(__MODULE__, :start_y)

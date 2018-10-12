@@ -12,7 +12,13 @@ defmodule Pong.Game do
     Paddle
   }
 
-  @type t :: %__MODULE__{}
+  @type t :: %__MODULE__{
+          ball: Ball.t(),
+          board: Board.t(),
+          paddle_left: Paddle.t(),
+          paddle_right: Paddle.t()
+        }
+
   @type player_ref :: :left | :right
 
   @spec new :: t()

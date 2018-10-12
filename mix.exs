@@ -7,7 +7,12 @@ defmodule MirrorPong.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       deps_path: deps_path(),
-      build_path: build_path()
+      build_path: build_path(),
+      dialyzer: [
+        plt_add_deps: :transitive,
+        plt_add_apps: [:mix],
+        flags: [:underspecs, :race_conditions]
+      ]
     ]
   end
 
@@ -18,7 +23,8 @@ defmodule MirrorPong.MixProject do
   # Run "mix help deps" for examples and options.
   defp deps do
     [
-      {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false}
+      {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false}
     ]
   end
 

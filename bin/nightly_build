@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [[ $SEMAPHORE_TRIGGER_SOURCE == "scheduler" ]]; then
+  dialyzer_error_count() {
+    mix dialyzer 2>&1 \
+    | perl -n -e '/^Total errors: (\d+)/ && print $1'
+  }
+
+  fail_with() {
+    echo "[dialyzer]: you have $1 errors"
+
+    exit 1
+  }
+
+  errors=$(dialyzer_error_count)
+
+  if [[ "$errors" != "0" ]]; then
+    fail_with $errors
+  fi
+fi
