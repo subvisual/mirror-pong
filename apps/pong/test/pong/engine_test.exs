@@ -131,7 +131,7 @@ defmodule Pong.EngineTest do
       assert {:reply, :ok, new_state} =
                Engine.handle_call({:leave, :right}, self(), state)
 
-      assert new_state.events == [{"player_left", :right}]
+      assert new_state.events == [{"player_left", %{player: :right}}]
     end
 
     test "waits for the pending cycle" do
@@ -239,6 +239,26 @@ defmodule Pong.EngineTest do
 
         assert new_state.movements == Movement.Buffer.new()
       end
+    end
+  end
+
+  describe "handle_call/3 for :current_state messages" do
+    test "errors if the game hasn't started" do
+      game = build(:game)
+      state = build_pong_state(game: game, player_left: true, player_right: nil)
+
+      {:reply, reply, _} = Engine.handle_call(:current_state, self(), state)
+
+      assert {:error, :not_started} = reply
+    end
+
+    test "returns the game if it has started" do
+      game = build(:game)
+      state = build_pong_state(game: game, player_left: true, player_right: true)
+
+      {:reply, reply, _} = Engine.handle_call(:current_state, self(), state)
+
+      assert {:ok, ^game} = reply
     end
   end
 

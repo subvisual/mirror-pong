@@ -119,25 +119,6 @@ defmodule Pong.RendererTest do
     end
   end
 
-  describe "handle_call/3 for :current_state messages" do
-    test "errors if the game hasn't started" do
-      state = build_state(game: nil)
-
-      {:reply, reply, _} = Renderer.handle_call(:current_state, self(), state)
-
-      assert {:error, :not_started} = reply
-    end
-
-    test "returns the game if it has started" do
-      game = build(:game)
-      state = build_state(game: game)
-
-      {:reply, reply, _} = Renderer.handle_call(:current_state, self(), state)
-
-      assert {:ok, ^game} = reply
-    end
-  end
-
   defp build_state(overrides \\ []) do
     [
       fps: 60,

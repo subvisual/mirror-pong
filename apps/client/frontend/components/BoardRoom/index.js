@@ -60,6 +60,10 @@ export default class BoardRoom extends Component {
     this.channel.on('game_starting', data => {
       this.setState({ delay: data.delay, game: data.game });
     });
+
+    this.channel.on('player_left', () => {
+      this.setState({ delay: null, game: null });
+    });
   };
 
   render() {

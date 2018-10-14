@@ -23,10 +23,6 @@ defmodule Pong.Renderer do
     GenServer.cast(__MODULE__, :stop)
   end
 
-  def current_state do
-    GenServer.call(__MODULE__, :current_state)
-  end
-
   def init(:ok) do
     {:ok, default_state()}
   end
@@ -52,16 +48,6 @@ defmodule Pong.Renderer do
     wait_for_next_render(state.period + 100)
 
     {:noreply, %{state | game: nil}}
-  end
-
-  def handle_call(:current_state, _from, state) do
-    reply =
-      case state.game do
-        nil -> {:error, :not_started}
-        game -> {:ok, game}
-      end
-
-    {:reply, reply, state}
   end
 
   def handle_info(:work, state) do
