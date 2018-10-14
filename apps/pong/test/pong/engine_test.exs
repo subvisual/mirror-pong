@@ -254,7 +254,9 @@ defmodule Pong.EngineTest do
 
     test "returns the game if it has started" do
       game = build(:game)
-      state = build_pong_state(game: game, player_left: true, player_right: true)
+
+      state =
+        build_pong_state(game: game, player_left: true, player_right: true)
 
       {:reply, reply, _} = Engine.handle_call(:current_state, self(), state)
 
