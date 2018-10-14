@@ -3,10 +3,11 @@ defmodule Pong.EngineTest do
   doctest Pong.Engine
 
   alias Pong.{
-    Engine,
     Movement,
     Renderer
   }
+
+  alias Pong.TestEngine, as: Engine
 
   import Pong.Factory
   import Mock
@@ -39,32 +40,6 @@ defmodule Pong.EngineTest do
   end
 
   describe "handle_call/3 for :join messages" do
-    test "errors if the game is full" do
-      state = build_pong_state(player_left: true, player_right: true)
-
-      {:reply, error, _} = Engine.handle_call(:join, self(), state)
-
-      assert {:error, :game_full} == error
-    end
-
-    test "adds the left player if no players have joined" do
-      state = build_pong_state()
-
-      {:reply, _, new_state} = Engine.handle_call(:join, self(), state)
-
-      assert new_state[:player_left]
-    end
-
-    test "adds the right player if there is a left player" do
-      with_mock Renderer, start: fn _, _ -> :ok end do
-        state = build_pong_state(player_left: true)
-
-        {:reply, _, new_state} = Engine.handle_call(:join, self(), state)
-
-        assert new_state[:player_right]
-      end
-    end
-
     test "starts the renderer" do
       with_mock Renderer, start: fn _, _ -> :ok end do
         state = build_pong_state(player_left: true)
@@ -106,25 +81,6 @@ defmodule Pong.EngineTest do
   end
 
   describe "handle_call/3 for :leave messages" do
-    test "removes the correct player from the state" do
-      state = build_pong_state(player_right: true)
-
-      {:reply, :ok, new_state} =
-        Engine.handle_call({:leave, :right}, self(), state)
-
-      refute new_state[:player_right]
-    end
-
-    test "ignores changes if the player id is invalid" do
-      state = build_pong_state(player_right: true, player_left: true)
-
-      assert {:reply, :ok, new_state} =
-               Engine.handle_call({:leave, :fake_id}, self(), state)
-
-      assert new_state.player_left
-      assert new_state.player_right
-    end
-
     test "adds an event if a player leaves" do
       state = build_pong_state(player_right: true, player_left: true)
 

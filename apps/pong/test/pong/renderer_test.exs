@@ -2,6 +2,7 @@ defmodule Pong.RendererTest do
   use ExUnit.Case
   doctest Pong.Renderer
 
+  alias Pong.Engines.Singles, as: Engine
   alias Pong.Renderer
 
   import Pong.Factory
@@ -97,7 +98,7 @@ defmodule Pong.RendererTest do
 
   describe "handle_info/2 for :work messages" do
     test "broadcasts the game state to all subscriptions" do
-      with_mock Pong.Engine, consume: fn -> {:ok, []} end do
+      with_mock Engine, consume: fn -> {:ok, []} end do
         subscriptions = [fn data -> send self(), data end]
         state = build_state(subscriptions: subscriptions)
 
@@ -108,7 +109,7 @@ defmodule Pong.RendererTest do
     end
 
     test "broadcasts the events to all subscriptions" do
-      with_mock Pong.Engine, consume: fn -> {:ok, [{"player_left", :right}]} end do
+      with_mock Engine, consume: fn -> {:ok, [{"player_left", :right}]} end do
         subscriptions = [fn data -> send self(), data end]
         state = build_state(subscriptions: subscriptions)
 
@@ -119,7 +120,7 @@ defmodule Pong.RendererTest do
     end
 
     test "schedules work" do
-      with_mock Pong.Engine, consume: fn -> {:ok, []} end do
+      with_mock Engine, consume: fn -> {:ok, []} end do
         subscriptions = [fn data -> send self(), data end]
         state = build_state(subscriptions: subscriptions, period: 1)
 
@@ -130,7 +131,7 @@ defmodule Pong.RendererTest do
     end
 
     test "doesn't schedule work if the game is over" do
-      with_mock Pong.Engine, consume: fn -> {:ok, [{"game_over", %{}}]} end do
+      with_mock Engine, consume: fn -> {:ok, [{"game_over", %{}}]} end do
         subscriptions = [fn data -> send self(), data end]
         state = build_state(subscriptions: subscriptions, period: 1)
 
