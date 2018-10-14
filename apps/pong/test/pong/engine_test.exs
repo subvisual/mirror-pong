@@ -131,7 +131,7 @@ defmodule Pong.EngineTest do
       assert {:reply, :ok, new_state} =
                Engine.handle_call({:leave, :right}, self(), state)
 
-      assert new_state.events == [{"player_left", :right}]
+      assert new_state.events == [{"player_left", %{player: :right}}]
     end
 
     test "waits for the pending cycle" do

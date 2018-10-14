@@ -14,7 +14,7 @@
   0% {
     opacity: 0;
   }
-  25% {
+  35% {
     opacity: 1;
   }
   75% {
@@ -26,7 +26,7 @@
 }
 
 .logo {
-  animation: fadeinout 4.5s infinite;
+  animation: fadeinout 5s infinite;
 }
 
 .logo * svg {

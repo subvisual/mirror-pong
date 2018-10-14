@@ -66,10 +66,12 @@ defmodule Pong.Engine do
   def handle_call({:leave, player_id}, _from, state) do
     wait_for_next_cycle(state.period + 100)
 
+    Renderer.stop()
+
     new_state =
       state
       |> remove_player(player_id)
-      |> push_event({"player_left", player_id})
+      |> push_event({"player_left", %{player: player_id}})
 
     {:reply, :ok, new_state}
   end
