@@ -36,10 +36,6 @@ defmodule Pong.Engine do
     GenServer.cast(__MODULE__, {:move, player, direction})
   end
 
-  def current_state do
-    GenServer.call(__MODULE__, :current_state)
-  end
-
   def init(:ok) do
     state = default_state()
 
@@ -69,6 +65,8 @@ defmodule Pong.Engine do
 
   def handle_call({:leave, player_id}, _from, state) do
     wait_for_next_cycle(state.period + 100)
+
+    Renderer.stop()
 
     new_state =
       state
@@ -102,16 +100,6 @@ defmodule Pong.Engine do
     schedule_work(new_state.period)
 
     {:noreply, new_state}
-  end
-
-  def handle_call(:current_state, _from, state) do
-    reply =
-      case state.game && players_ready?(state) do
-        nil -> {:error, :not_started}
-        game -> {:ok, state.game}
-      end
-
-    {:reply, reply, state}
   end
 
   defp add_player(%{player_left: nil} = state) do
