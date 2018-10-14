@@ -152,7 +152,7 @@ defmodule Pong.EngineTest do
       end
 
       refute_receive :checkpoint_1, 100
-      assert_receive :checkpoint_1, 200
+      assert_receive :checkpoint_1, 400
 
       child_pid =
         spawn fn ->
