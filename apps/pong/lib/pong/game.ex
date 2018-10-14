@@ -25,6 +25,7 @@ defmodule Pong.Game do
           score_left: integer(),
           score_right: integer()
         }
+
   @type default :: %__MODULE__{
           ball: Ball.t(),
           board: Board.t(),

@@ -65,7 +65,7 @@ defmodule Pong.Renderer do
   end
 
   def handle_info(:work, state) do
-    {game, events} = Pong.Engine.consume()
+    {game, events} = Pong.Engines.Singles.consume()
 
     broadcast(state.subscriptions, {"data", game})
     for event <- events, do: broadcast(state.subscriptions, event)

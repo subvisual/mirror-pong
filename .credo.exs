@@ -51,7 +51,7 @@
         {Credo.Check.Refactor.CyclomaticComplexity},
         # This should be a product of our common sense and detailed in reviews
         {Credo.Check.Refactor.FunctionArity, false},
-        {Credo.Check.Refactor.LongQuoteBlocks},
+        {Credo.Check.Refactor.LongQuoteBlocks, false},
         {Credo.Check.Refactor.MatchInCondition},
         {Credo.Check.Refactor.NegatedConditionsInUnless},
         {Credo.Check.Refactor.NegatedConditionsWithElse},

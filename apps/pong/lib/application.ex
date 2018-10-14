@@ -8,5 +8,5 @@ defmodule Pong.Application do
   end
 
   defp children(:test), do: []
-  defp children(_), do: [Pong.Engine, Pong.Renderer]
+  defp children(_), do: [Pong.Engines.Singles, Pong.Renderer]
 end
