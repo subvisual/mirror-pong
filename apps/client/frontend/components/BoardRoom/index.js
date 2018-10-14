@@ -44,6 +44,10 @@ export default class BoardRoom extends Component {
       this.setState({ delay: data.delay, game: data.game });
     });
 
+    this.channel.on('game_over', data => {
+      console.log('Game over:', data); // eslint-disable-line
+    });
+
     this.channel.on('player_left', () => {
       this.setState({ delay: null, game: null });
     });

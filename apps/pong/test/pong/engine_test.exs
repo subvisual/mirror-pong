@@ -270,6 +270,44 @@ defmodule Pong.EngineTest do
         assert_receive :work
       end
     end
+
+    test "resets the state but keeps the events if the game has ended" do
+      mock_apply_to = fn game, _ -> {[{"game_over", %{}}], game} end
+
+      with_mock Movement, apply_to: mock_apply_to do
+        state =
+          build_pong_state(
+            player_left: true,
+            player_right: true,
+            start_delay: 1,
+            period: 1
+          )
+
+        {:noreply, new_state} = Engine.handle_info(:work, state)
+
+        assert new_state.events == [{"game_over", %{}}]
+        refute new_state.player_left
+        refute new_state.player_right
+      end
+    end
+
+    test "doesn't schedule work if the game has ended" do
+      mock_apply_to = fn game, _ -> {[{"game_over", %{}}], game} end
+
+      with_mock Movement, apply_to: mock_apply_to do
+        state =
+          build_pong_state(
+            player_left: true,
+            player_right: true,
+            start_delay: 1,
+            period: 1
+          )
+
+        {:noreply, _} = Engine.handle_info(:work, state)
+
+        refute_receive :work
+      end
+    end
   end
 
   defp build_pong_state(overrides \\ []) do

@@ -17,7 +17,8 @@ defmodule Pong.Factory do
       paddle_left: build(:left_paddle),
       paddle_right: build(:right_paddle),
       score_left: 0,
-      score_right: 0
+      score_right: 0,
+      score_limit: 3
     }
   end
 

@@ -198,5 +198,27 @@ defmodule Pong.MovementTest do
 
       assert {[{"player_scored", _} | _], _} = Movement.apply_to(game, buffer)
     end
+
+    test "includes a game_over event if the game is over" do
+      # move the paddle out of the way
+      paddle = build(:right_paddle, y: 50, height: 100)
+      # ball is one unit away from being past the right paddle
+      ball_x = paddle.x + paddle.width / 2 - 1
+      ball = build(:ball, x: ball_x, speed: 10, vector_x: 1, vector_y: 0)
+
+      game =
+        build(:game,
+          paddle_right: paddle,
+          ball: ball,
+          score_right: 2,
+          score_limit: 3
+        )
+
+      buffer = build(:movement_buffer)
+
+      {events, _} = Movement.apply_to(game, buffer)
+
+      assert Enum.find(events, false, fn {e, _} -> e == "game_over" end)
+    end
   end
 end

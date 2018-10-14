@@ -117,6 +117,28 @@ defmodule Pong.RendererTest do
         assert_receive {"player_left", :right}
       end
     end
+
+    test "schedules work" do
+      with_mock Pong.Engine, consume: fn -> {:ok, []} end do
+        subscriptions = [fn data -> send self(), data end]
+        state = build_state(subscriptions: subscriptions, period: 1)
+
+        {:noreply, _} = Renderer.handle_info(:work, state)
+
+        assert_receive :work
+      end
+    end
+
+    test "doesn't schedule work if the game is over" do
+      with_mock Pong.Engine, consume: fn -> {:ok, [{"game_over", %{}}]} end do
+        subscriptions = [fn data -> send self(), data end]
+        state = build_state(subscriptions: subscriptions, period: 1)
+
+        {:noreply, _} = Renderer.handle_info(:work, state)
+
+        refute_receive :work
+      end
+    end
   end
 
   describe "handle_call/3 for :current_state messages" do

@@ -70,7 +70,7 @@ defmodule Pong.Renderer do
     broadcast(state.subscriptions, {"data", game})
     for event <- events, do: broadcast(state.subscriptions, event)
 
-    schedule_work(state.period)
+    unless game_over?(events), do: schedule_work(state.period)
 
     {:noreply, %{state | game: game}}
   end
@@ -79,6 +79,10 @@ defmodule Pong.Renderer do
     for sub <- subscriptions do
       sub.(game)
     end
+  end
+
+  defp game_over?(events) do
+    Enum.find(events, false, fn {event, _} -> event == "game_over" end)
   end
 
   defp wait_for_next_render(timeout) do

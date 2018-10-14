@@ -68,14 +68,23 @@ defmodule Pong.Movement do
   end
 
   defp update_score(game, ref) do
-    updated_game = Game.score(game, ref)
+    {event, updated_game} = Game.score(game, ref)
 
     payload = %{
       score_left: updated_game.score_left,
       score_right: updated_game.score_right
     }
 
-    {[{"player_scored", payload}], updated_game}
+    events =
+      case event do
+        :player_scored ->
+          [{"player_scored", payload}]
+
+        :game_over ->
+          [{"player_scored", payload}, {"game_over", updated_game}]
+      end
+
+    {events, updated_game}
   end
 
   defp apply_paddle_movements(paddle, movements, board) do

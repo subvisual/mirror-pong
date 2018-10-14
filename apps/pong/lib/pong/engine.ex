@@ -93,19 +93,14 @@ defmodule Pong.Engine do
   def handle_info(:work, %{game: game, movements: movements} = state) do
     {events, updated_game} = Movement.apply_to(game, movements)
 
-    new_state = %{
-      state
-      | game: updated_game,
-        movements: Movement.Buffer.new(),
-        events: events ++ state.events
-    }
-
-    delay =
-      if player_scored?(events),
-        do: new_state.start_delay,
-        else: new_state.period
-
-    schedule_work(delay)
+    new_state =
+      %{
+        state
+        | game: updated_game,
+          movements: Movement.Buffer.new(),
+          events: events ++ state.events
+      }
+      |> handle_events()
 
     {:noreply, new_state}
   end
@@ -136,10 +131,27 @@ defmodule Pong.Engine do
 
   defp players_ready?(state), do: state.player_left && state.player_right
 
-  defp player_scored?(events) do
-    Enum.find(events, false, fn {event, _} ->
-      event == "player_scored"
-    end)
+  defp handle_events(%{events: events} = state) do
+    cond do
+      game_over?(events) ->
+        default_state(events: events)
+
+      player_scored?(events) ->
+        schedule_work(state.start_delay)
+        state
+
+      true ->
+        schedule_work(state.period)
+        state
+    end
+  end
+
+  defp player_scored?(events), do: find_event(events, "player_scored")
+
+  defp game_over?(events), do: find_event(events, "game_over")
+
+  defp find_event(events, event) do
+    Enum.find(events, false, fn {e, _} -> event == e end)
   end
 
   defp prepare_start(%{game: game, start_delay: start_delay}) do
@@ -152,11 +164,11 @@ defmodule Pong.Engine do
     %{state | events: events ++ [event]}
   end
 
-  defp default_state do
+  defp default_state(overrides \\ []) do
     fps = config(Pong, :fps, @fps)
     start_delay = config(Pong, :start_delay, @start_delay)
 
-    %{
+    [
       game: Game.new(),
       fps: fps,
       period: Kernel.trunc(1 / fps * 1_000),
@@ -165,7 +177,9 @@ defmodule Pong.Engine do
       player_right: nil,
       movements: Movement.Buffer.new(),
       events: []
-    }
+    ]
+    |> Keyword.merge(overrides)
+    |> Enum.into(%{})
   end
 
   defp wait_for_next_cycle(timeout) do
