@@ -1,7 +1,7 @@
 import { Animation } from 'konva';
-import { Socket } from 'phoenix';
 
 import positioning from './positioning';
+import Channel from './channel';
 
 export default class GameAnimator {
   constructor({ layer, paddleLeft, paddleRight, ball, width, height }) {
@@ -13,36 +13,30 @@ export default class GameAnimator {
     this.height = height;
     this.animation = new Animation(this.animate, this.layer);
 
-    this.socket = new Socket('/socket');
-
-    this.socket.connect();
-    this.channel = this.socket.channel('game:board');
+    this.channel = new Channel('game:board');
     this.joinChannel();
   }
 
-  joinChannel = () => {
-    this.channel
-      .join()
-      .receive('ok', () => {
-        console.log('Joined successfully'); // eslint-disable-line
-        this.subscribeToData();
-      })
-      .receive('error', resp => {
-        console.log('Unable to join', resp); // eslint-disable-line
-      });
+  joinChannel = async () => {
+    try {
+      await this.channel.join();
+
+      console.log('Joined successfully'); // eslint-disable-line
+
+      this.subscribeToData();
+    } catch (error) {
+      console.log('Unable to join', resp); // eslint-disable-line
+    }
   };
 
-  leaveChannel = () => {
-    this.channel
-      .leave()
-      .receive('ok', resp => {
-        console.log('Left successfully', resp); // eslint-disable-line
-        this.socket.disconnect();
-      })
-      .receive('error', resp => {
-        console.log('Could not leave the channel!', resp); // eslint-disable-line
-        this.socket.disconnect();
-      });
+  leaveChannel = async () => {
+    try {
+      const response = await this.channel.leave();
+
+      console.log('Left successfully', response); // eslint-disable-line
+    } catch (error) {
+      console.log('Error while leaving the channel', error); // eslint-disable-line
+    }
   };
 
   setDimensions = (width, height) => {

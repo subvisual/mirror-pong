@@ -1,25 +1,21 @@
 import React, { Component } from 'react';
-import { Socket } from 'phoenix';
 import _ from 'lodash';
 
 import Centered from '../Centered';
 import BoardCountdown from '../BoardCountdown';
+import Channel from '../../lib/channel';
 
 export default class BoardRoom extends Component {
-  /* eslint react/no-unused-state: 0 */
   state = {
     game: null,
     delay: null,
   };
-  /* eslint react/no-unused-state: 1 */
 
   constructor(props) {
     super(props);
 
-    this.socket = new Socket('/socket');
+    this.channel = new Channel('game:metadata');
 
-    this.socket.connect();
-    this.channel = this.socket.channel('game:metadata');
     this.joinChannel();
   }
 
@@ -28,32 +24,19 @@ export default class BoardRoom extends Component {
   }
 
   joinChannel = () => {
-    this.channel
-      .join()
-      .receive('ok', data => {
-        console.log('Joined successfully'); // eslint-disable-line
-        this.subscribeToMetadata();
+    try {
+      const response = this.channel.join();
 
-        if (data.game) {
-          this.setState({ game: data.game });
-        }
-      })
-      .receive('error', resp => {
-        console.log('Unable to join', resp); // eslint-disable-line
-      });
-  };
+      console.log('Joined successfully'); // eslint-disable-line
 
-  leaveChannel = () => {
-    this.channel
-      .leave()
-      .receive('ok', resp => {
-        console.log('Left successfully', resp); // eslint-disable-line
-        this.socket.disconnect();
-      })
-      .receive('error', resp => {
-        console.log('Could not leave the channel!', resp); // eslint-disable-line
-        this.socket.disconnect();
-      });
+      this.subscribeToMetadata();
+
+      if (response.game) {
+        this.setState({ game: response.game });
+      }
+    } catch (error) {
+      console.log('Unable to join', resp); // eslint-disable-line
+    }
   };
 
   subscribeToMetadata = () => {
@@ -64,6 +47,16 @@ export default class BoardRoom extends Component {
     this.channel.on('player_left', () => {
       this.setState({ delay: null, game: null });
     });
+  };
+
+  leaveChannel = async () => {
+    try {
+      const response = await this.channel.leave();
+
+      console.log('Left successfully', response); // eslint-disable-line
+    } catch (error) {
+      console.log('Error while leaving the channel', error); // eslint-disable-line
+    }
   };
 
   render() {

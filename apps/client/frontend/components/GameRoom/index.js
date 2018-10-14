@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { Socket } from 'phoenix';
 
 import Controller from '../Controller';
+import Centered from '../Centered';
+import Channel from '../../lib/channel';
 
 import './index.css';
-import Centered from '../Centered';
 
 export default class GameRoom extends Component {
   state = {
@@ -16,13 +16,8 @@ export default class GameRoom extends Component {
   constructor(props) {
     super(props);
 
-    this.socket = new Socket('/socket');
+    this.channel = new Channel('game:play');
 
-    this.socket.connect();
-    this.channel = this.socket.channel('game:play');
-  }
-
-  componentDidMount() {
     this.joinChannel();
   }
 
@@ -30,30 +25,28 @@ export default class GameRoom extends Component {
     this.leaveChannel();
   }
 
-  joinChannel = () => {
-    this.channel
-      .join()
-      .receive('ok', resp => {
-        console.log('Joined successfully', resp); // eslint-disable-line
-        this.setState({ loading: false, status: 'joined', ...resp });
-      })
-      .receive('error', resp => {
-        console.log('Unable to join', resp); // eslint-disable-line
-        this.setState({ loading: false, status: 'error' });
-      });
+  joinChannel = async () => {
+    try {
+      const response = await this.channel.join();
+
+      console.log('Joined successfully', response); // eslint-disable-line
+
+      this.setState({ loading: false, status: 'joined', ...response });
+    } catch (error) {
+      console.log('Unable to join', error); // eslint-disable-line
+
+      this.setState({ loading: false, status: 'error' });
+    }
   };
 
-  leaveChannel = () => {
-    this.channel
-      .leave()
-      .receive('ok', resp => {
-        console.log('Left successfully', resp); // eslint-disable-line
-        this.socket.disconnect();
-      })
-      .receive('error', resp => {
-        console.log('Could not leave the channel!', resp); // eslint-disable-line
-        this.socket.disconnect();
-      });
+  leaveChannel = async () => {
+    try {
+      const response = await this.channel.leave();
+
+      console.log('Left successfully', response); // eslint-disable-line
+    } catch (error) {
+      console.log('Error while leaving the channel', error); // eslint-disable-line
+    }
   };
 
   renderInnerContent() {

@@ -2,7 +2,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 module.exports = {
-  entry: './frontend/index.js',
+  entry: ['@babel/polyfill', './frontend/index.js'],
 
   stats: {
     children: false,
