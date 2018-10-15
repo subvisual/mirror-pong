@@ -9,6 +9,7 @@ export default class BoardRoom extends Component {
   state = {
     game: null,
     delay: null,
+    gameOver: false,
   };
 
   constructor(props) {
@@ -23,13 +24,14 @@ export default class BoardRoom extends Component {
     this.leaveChannel();
   }
 
-  joinChannel = () => {
+  joinChannel = async () => {
     try {
-      const response = this.channel.join();
+      const response = await this.channel.join();
 
       console.log('Joined successfully'); // eslint-disable-line
 
       this.subscribeToMetadata();
+
 
       if (response.game) {
         this.setState({ game: response.game });
@@ -41,11 +43,11 @@ export default class BoardRoom extends Component {
 
   subscribeToMetadata = () => {
     this.channel.on('game_starting', data => {
-      this.setState({ delay: data.delay, game: data.game });
+      this.setState({ delay: data.delay, game: data.game, gameOver: false });
     });
 
-    this.channel.on('game_over', data => {
-      console.log('Game over:', data); // eslint-disable-line
+    this.channel.on('game_over', () => {
+      this.setState({ gameOver: true });
     });
 
     this.channel.on('player_left', () => {
@@ -64,7 +66,15 @@ export default class BoardRoom extends Component {
   };
 
   render() {
-    const { game, delay } = this.state;
+    const { game, delay, gameOver } = this.state;
+
+    if (gameOver) {
+      return (
+        <Centered>
+          Game Over!
+        </Centered>
+      );
+    }
 
     if (_.isNil(game)) {
       return <Centered>Currently waiting for players!</Centered>;

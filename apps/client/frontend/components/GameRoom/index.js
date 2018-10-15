@@ -10,28 +10,38 @@ export default class GameRoom extends Component {
   state = {
     loading: true,
     status: null,
-    paddle_color: null,
+    paddleColor: null,
+    gameOver: false,
   };
 
   constructor(props) {
     super(props);
 
-    this.channel = new Channel('game:play');
+    this.playChannel = new Channel('game:play');
+    this.metadataChannel = new Channel('game:metadata');
 
-    this.joinChannel();
+    this.joinChannel(this.playChannel);
+    this.joinChannel(this.metadataChannel);
+
+    this.subscribeToGameOver();
   }
 
   componentWillUnmount() {
-    this.leaveChannel();
+    this.leaveChannel(this.playChannel);
+    this.leaveChannel(this.metadataChannel);
   }
 
-  joinChannel = async () => {
+  joinChannel = async channel => {
     try {
-      const response = await this.channel.join();
+      const response = await channel.join();
 
       console.log('Joined successfully', response); // eslint-disable-line
 
-      this.setState({ loading: false, status: 'joined', ...response });
+      this.setState({
+        loading: false,
+        status: 'joined',
+        paddleColor: response.paddle_color,
+      });
     } catch (error) {
       console.log('Unable to join', error); // eslint-disable-line
 
@@ -39,9 +49,19 @@ export default class GameRoom extends Component {
     }
   };
 
-  leaveChannel = async () => {
+  subscribeToGameOver = () => {
+    this.metadataChannel.on('game_over', () => {
+      this.setState({ gameOver: true });
+
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 3000);
+    });
+  };
+
+  leaveChannel = async channel => {
     try {
-      const response = await this.channel.leave();
+      const response = await channel.leave();
 
       console.log('Left successfully', response); // eslint-disable-line
     } catch (error) {
@@ -52,17 +72,19 @@ export default class GameRoom extends Component {
   renderInnerContent() {
     const { status } = this.state;
 
-    if (status === 'joined') return <Controller channel={this.channel} />;
+    if (status === 'joined') return <Controller channel={this.playChannel} />;
 
     return 'Could not join the game!';
   }
 
   render() {
-    const { loading } = this.state;
+    const { loading, gameOver } = this.state;
 
     if (loading) return <div styleName="root" />;
 
-    const { paddle_color: backgroundColor } = this.state;
+    if (gameOver) return <Centered>Game Over!</Centered>;
+
+    const { paddleColor: backgroundColor } = this.state;
 
     return (
       <Centered style={{ backgroundColor }}>

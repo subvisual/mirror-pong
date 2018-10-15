@@ -125,8 +125,14 @@ defmodule Pong.Engine do
 
   defp add_player(_), do: {:error, :game_full}
 
-  defp remove_player(state, :left), do: %{state | player_left: nil}
-  defp remove_player(state, :right), do: %{state | player_right: nil}
+  defp remove_player(%{player_left: player_left} = state, :left)
+       when not is_nil(player_left),
+       do: %{state | player_left: nil}
+
+  defp remove_player(%{player_right: player_right} = state, :right)
+       when not is_nil(player_right),
+       do: %{state | player_right: nil}
+
   defp remove_player(state, _), do: state
 
   defp players_ready?(state), do: state.player_left && state.player_right

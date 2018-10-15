@@ -33,4 +33,8 @@ export default class Channel {
   on = (event, callback) => {
     this.channel.on(event, callback);
   };
+
+  push = (event, payload) => {
+    this.channel.push(event, payload);
+  };
 }
