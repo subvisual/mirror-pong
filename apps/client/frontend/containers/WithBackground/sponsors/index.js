@@ -16,9 +16,21 @@ import PortugueseWomenInTech from './assets/pwit.png';
 import StartupBraga from './assets/sbs.svg';
 import Xing from './assets/xing.svg';
 
+const preloadImage = url => {
+  const image = new Image();
+console.log(url);
+  image.src = url;
+};
+
 const pngToComponent = png => () => (
   <img height="200" width="200" src={png} alt="" />
 );
+
+window.onload = () => {
+  preloadImage(Balsamiq);
+  preloadImage(Mediaweb);
+  preloadImage(PortugueseWomenInTech);
+};
 
 export default [
   pngToComponent(Balsamiq),

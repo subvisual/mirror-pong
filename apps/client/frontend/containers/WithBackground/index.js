@@ -47,9 +47,9 @@ export default function(Child) {
             <div styleName="score">
               <Scoreboard />
             </div>
-            <Centered>
-              <div styleName="logo">{renderLogo}</div>
-            </Centered>
+            <div styleName="logo">
+              <Centered>{renderLogo}</Centered>
+            </div>
           </div>
           <Child {...this.props} />
         </Fragment>

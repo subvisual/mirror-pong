@@ -35,8 +35,11 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: '[path][name]-[hash:8].[ext]',
-              publicPath: 'assets/',
+              name: '[name]-[hash:8].[ext]',
+              publicPath:
+                process.env.NODE_ENV === 'production'
+                  ? '/assets'
+                  : 'http://localhost:8080/assets',
             },
           },
         ],
