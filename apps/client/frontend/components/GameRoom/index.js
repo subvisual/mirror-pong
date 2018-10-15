@@ -20,7 +20,13 @@ export default class GameRoom extends Component {
     this.playChannel = new Channel('game:play');
     this.metadataChannel = new Channel('game:metadata');
 
-    this.joinChannel(this.playChannel);
+    this.joinChannel(this.playChannel).then(response => {
+      this.setState({
+        loading: false,
+        status: 'joined',
+        paddleColor: response.paddle_color,
+      });
+    });
     this.joinChannel(this.metadataChannel);
 
     this.subscribeToGameOver();
@@ -37,11 +43,7 @@ export default class GameRoom extends Component {
 
       console.log('Joined successfully', response); // eslint-disable-line
 
-      this.setState({
-        loading: false,
-        status: 'joined',
-        paddleColor: response.paddle_color,
-      });
+      return response;
     } catch (error) {
       console.log('Unable to join', error); // eslint-disable-line
 
@@ -80,7 +82,7 @@ export default class GameRoom extends Component {
   render() {
     const { loading, gameOver } = this.state;
 
-    if (loading) return <div styleName="root" />;
+    if (loading) return null;
 
     if (gameOver) return <Centered>Game Over!</Centered>;
 
