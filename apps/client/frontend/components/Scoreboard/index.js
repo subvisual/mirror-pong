@@ -32,8 +32,8 @@ export default class Scoreboard extends Component {
 
       console.log('Joined successfully', response); // eslint-disable-line no-console
 
-      const left = _.get(response, 'game.score_left');
-      const right = _.get(response, 'game.score_right');
+      const left = _.get(response, 'game.score_left', 0);
+      const right = _.get(response, 'game.score_right', 0);
 
       this.setState({ score: { left, right }, loading: false });
       this.subscribeToGoals();
