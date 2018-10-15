@@ -4,7 +4,7 @@ defmodule Client.GameTest do
   alias ClientWeb.Channels.GameChannel
 
   setup do
-    with {:ok, _} <- Pong.Engines.Singles.start_link([]),
+    with {:ok, _} <- Pong.Engines.Multi.start_link([]),
          {:ok, _} <- Pong.Renderer.start_link([]) do
       ClientWeb.PongSubscription.create()
 
@@ -16,7 +16,7 @@ defmodule Client.GameTest do
 
   describe "gameplay" do
     test "updates watchers on every move" do
-      {initial_state, []} = Pong.Engines.Singles.consume()
+      {initial_state, []} = Pong.Engines.Multi.consume()
 
       {:ok, _, _game_socket} =
         socket()

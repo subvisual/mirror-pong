@@ -2,7 +2,7 @@ defmodule Pong.RendererTest do
   use ExUnit.Case
   doctest Pong.Renderer
 
-  alias Pong.Engines.Singles, as: Engine
+  alias Pong.Engines.Multi, as: Engine
   alias Pong.Renderer
 
   import Pong.Factory

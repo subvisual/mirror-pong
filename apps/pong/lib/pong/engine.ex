@@ -78,8 +78,6 @@ defmodule Pong.Engine do
       end
 
       def handle_call(:join, _from, state) do
-        wait_for_next_cycle(state.period + 100)
-
         case add_player(state.player_left, state.player_right) do
           {:ok, player_id, value} ->
             {player_data, new_state} = add_player_to(state, player_id, value)
@@ -92,21 +90,22 @@ defmodule Pong.Engine do
       end
 
       def handle_call({:leave, player_id}, _from, state) do
-        wait_for_next_cycle(state.period + 100)
+        new_state =
+          case remove_player_from(state, player_id) do
+            {:ok, state_without_player} ->
+              end_game_if_over(state_without_player)
 
-        new_state = remove_player_from(state, player_id)
-
-        unless players_ready?(new_state.player_left, new_state.player_right),
-          do: Renderer.stop()
+            {:error, :invalid_player} ->
+              state
+          end
 
         {:reply, :ok, new_state}
       end
 
       def handle_call(:consume, _from, state) do
         reply = {state.game, state.events}
-        new_state = %{state | events: []}
 
-        {:reply, reply, new_state}
+        {:reply, reply, %{state | events: []}}
       end
 
       def handle_call(:stop, _from, _state) do
@@ -150,10 +149,11 @@ defmodule Pong.Engine do
       defp add_player_to(state, player_id, value) do
         player_ref = String.to_existing_atom("player_#{player_id}")
         paddle_ref = String.to_existing_atom("paddle_#{player_id}")
-        new_state = Map.put(state, player_ref, value)
 
-        if players_ready?(new_state.player_left, new_state.player_right),
-          do: prepare_start(state)
+        new_state =
+          state
+          |> Map.put(player_ref, value)
+          |> prepare_start()
 
         player_data = %{
           player_id: player_id,
@@ -168,13 +168,34 @@ defmodule Pong.Engine do
         player = Map.get(state, player_ref)
 
         case remove_player(player_id, player) do
-          {:error, :invalid_player} ->
-            state
+          {:error, :invalid_player} = error ->
+            error
 
           {:ok, new_player} ->
-            state
-            |> Map.put(player_ref, new_player)
-            |> push_event({"player_left", %{player: player_id}})
+            new_state = Map.put(state, player_ref, new_player)
+
+            {:ok,
+             push_event(
+               new_state,
+               {"player_left",
+                %{
+                  player_left: new_state.player_left,
+                  player_right: new_state.player_right
+                }}
+             )}
+        end
+      end
+
+      defp end_game_if_over(state) do
+        if players_ready?(state.player_left, state.player_right) do
+          state
+        else
+          wait_for_next_cycle(state.period + 100)
+
+          push_event(
+            default_state(),
+            {"game_over", state.game}
+          )
         end
       end
 
@@ -185,10 +206,28 @@ defmodule Pong.Engine do
       defp find_event(events, event),
         do: Enum.find(events, false, fn {e, _} -> event == e end)
 
-      defp prepare_start(%{game: game, start_delay: start_delay}) do
-        Renderer.start(game, start_delay)
+      defp prepare_start(state) do
+        %{
+          game: game,
+          player_left: player_left,
+          player_right: player_right,
+          in_progress: in_progress,
+          start_delay: start_delay,
+          period: period
+        } = state
 
-        schedule_work(start_delay)
+        cond do
+          in_progress ->
+            state
+
+          players_ready?(player_left, player_right) ->
+            Renderer.start(game, start_delay)
+            schedule_work(start_delay)
+            %{state | in_progress: true}
+
+          true ->
+            state
+        end
       end
 
       defp push_event(%{events: events} = state, event) do
@@ -206,6 +245,7 @@ defmodule Pong.Engine do
           start_delay: start_delay,
           player_left: nil,
           player_right: nil,
+          in_progress: false,
           movements: Movement.Buffer.new(),
           events: []
         ]

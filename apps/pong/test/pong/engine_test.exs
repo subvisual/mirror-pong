@@ -3,6 +3,7 @@ defmodule Pong.EngineTest do
   doctest Pong.Engine
 
   alias Pong.{
+    Engines,
     Movement,
     Renderer
   }
@@ -23,6 +24,7 @@ defmodule Pong.EngineTest do
                start_delay: _,
                player_left: nil,
                player_right: nil,
+               in_progress: false,
                movements: _
              } = state
     end
@@ -81,13 +83,25 @@ defmodule Pong.EngineTest do
   end
 
   describe "handle_call/3 for :leave messages" do
-    test "adds an event if a player leaves" do
+    # This test only happens in multi-like cases
+    test "adds a player left event if a player leaves" do
+      state = build_pong_state(player_right: 2, player_left: 2)
+
+      assert {:reply, :ok, new_state} =
+               Engines.Multi.handle_call({:leave, :right}, self(), state)
+
+      assert new_state.events == [
+               {"player_left", %{player_left: 2, player_right: 1}}
+             ]
+    end
+
+    test "ends the game if there aren't enough players" do
       state = build_pong_state(player_right: true, player_left: true)
 
       assert {:reply, :ok, new_state} =
                Engine.handle_call({:leave, :right}, self(), state)
 
-      assert new_state.events == [{"player_left", %{player: :right}}]
+      assert [{"game_over", _}] = new_state.events
     end
 
     test "waits for the pending cycle" do
@@ -275,6 +289,7 @@ defmodule Pong.EngineTest do
       player_left: nil,
       player_right: nil,
       movements: Movement.Buffer.new(),
+      in_progress: false,
       events: []
     ]
     |> Keyword.merge(overrides)
