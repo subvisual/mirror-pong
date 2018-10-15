@@ -17,11 +17,6 @@
   left: 50%;
   z-index: 1;
 
-  color: white;
-
-  font-family: var(--font-family-monospace);
-  font-size: var(--size-112);
-
   transform: translate(-50%, -50%);
 }
 
