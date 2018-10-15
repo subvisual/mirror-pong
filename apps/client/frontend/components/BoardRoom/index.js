@@ -32,7 +32,6 @@ export default class BoardRoom extends Component {
 
       this.subscribeToMetadata();
 
-
       if (response.game) {
         this.setState({ game: response.game });
       }
@@ -50,8 +49,10 @@ export default class BoardRoom extends Component {
       this.setState({ gameOver: true });
     });
 
-    this.channel.on('player_left', () => {
-      this.setState({ delay: null, game: null });
+    this.channel.on('player_left', data => {
+      if (this.noPlayersAvailable(data)) {
+        this.setState({ delay: null, game: null });
+      }
     });
   };
 
@@ -65,15 +66,20 @@ export default class BoardRoom extends Component {
     }
   };
 
+  noPlayersAvailable = ({
+    player_left: playerLeft,
+    player_right: playerRight,
+  }) =>
+    _.isNil(playerLeft) ||
+    _.isNil(playerRight) ||
+    playerLeft === 0 ||
+    playerRight === 0;
+
   render() {
     const { game, delay, gameOver } = this.state;
 
     if (gameOver) {
-      return (
-        <Centered>
-          Game Over!
-        </Centered>
-      );
+      return <Centered>Game Over!</Centered>;
     }
 
     if (_.isNil(game)) {

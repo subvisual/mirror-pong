@@ -16,9 +16,12 @@ defmodule Pong.Engines.Multi do
       when left > 200 or right > 200,
       do: {:error, :game_full}
 
-  def remove_player(:left, left)
-      when left > 0,
-      do: {:ok, left - 1}
+  def remove_player(_, nil),
+    do: {:error, :invalid_player}
+
+  def remove_player(_, value)
+      when value > 0,
+      do: {:ok, value - 1}
 
   def remove_player(:right, right)
       when right > 0,

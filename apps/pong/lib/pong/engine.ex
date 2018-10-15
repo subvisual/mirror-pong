@@ -78,8 +78,6 @@ defmodule Pong.Engine do
       end
 
       def handle_call(:join, _from, state) do
-        wait_for_next_cycle(state.period + 100)
-
         case add_player(state.player_left, state.player_right) do
           {:ok, player_id, value} ->
             {player_data, new_state} = add_player_to(state, player_id, value)
@@ -92,21 +90,22 @@ defmodule Pong.Engine do
       end
 
       def handle_call({:leave, player_id}, _from, state) do
-        wait_for_next_cycle(state.period + 100)
+        new_state =
+          case remove_player_from(state, player_id) do
+            {:ok, state_without_player} ->
+              end_game_if_over(state_without_player)
 
-        new_state = remove_player_from(state, player_id)
-
-        unless players_ready?(new_state.player_left, new_state.player_right),
-          do: Renderer.stop()
+            {:error, :invalid_player} ->
+              state
+          end
 
         {:reply, :ok, new_state}
       end
 
       def handle_call(:consume, _from, state) do
         reply = {state.game, state.events}
-        new_state = %{state | events: []}
 
-        {:reply, reply, new_state}
+        {:reply, reply, %{state | events: []}}
       end
 
       def handle_call(:stop, _from, _state) do
@@ -169,13 +168,34 @@ defmodule Pong.Engine do
         player = Map.get(state, player_ref)
 
         case remove_player(player_id, player) do
-          {:error, :invalid_player} ->
-            state
+          {:error, :invalid_player} = error ->
+            error
 
           {:ok, new_player} ->
-            state
-            |> Map.put(player_ref, new_player)
-            |> push_event({"player_left", %{player: player_id}})
+            new_state = Map.put(state, player_ref, new_player)
+
+            {:ok,
+             push_event(
+               new_state,
+               {"player_left",
+                %{
+                  player_left: new_state.player_left,
+                  player_right: new_state.player_right
+                }}
+             )}
+        end
+      end
+
+      defp end_game_if_over(state) do
+        if players_ready?(state.player_left, state.player_right) do
+          state
+        else
+          wait_for_next_cycle(state.period + 100)
+
+          push_event(
+            default_state(),
+            {"game_over", state.game}
+          )
         end
       end
 
@@ -198,7 +218,6 @@ defmodule Pong.Engine do
 
         cond do
           in_progress ->
-            schedule_work(period)
             state
 
           players_ready?(player_left, player_right) ->
