@@ -159,7 +159,7 @@ defmodule Pong.MovementTest do
       assert updated_rightside_ball.vector_x == -rightside_ball.vector_x
     end
 
-    test "updates the left player score when the ball is past the left paddle" do
+    test "updates the right player score when the ball is past the left paddle" do
       # move the paddle out of the way
       paddle = build(:left_paddle, y: 50, height: 100)
       # ball is one unit away from being past the left paddle
@@ -170,10 +170,10 @@ defmodule Pong.MovementTest do
 
       {_, updated_game} = Movement.apply_to(game, buffer)
 
-      assert updated_game.score_left > game.score_left
+      assert updated_game.score_right > game.score_right
     end
 
-    test "updates the right player score when the ball is past the right paddle" do
+    test "updates the left player score when the ball is past the right paddle" do
       # move the paddle out of the way
       paddle = build(:right_paddle, y: 50, height: 100)
       # ball is one unit away from being past the right paddle
@@ -184,7 +184,7 @@ defmodule Pong.MovementTest do
 
       {_, updated_game} = Movement.apply_to(game, buffer)
 
-      assert updated_game.score_right > game.score_right
+      assert updated_game.score_left > game.score_left
     end
 
     test "returns an event if a player scored" do
@@ -210,7 +210,7 @@ defmodule Pong.MovementTest do
         build(:game,
           paddle_right: paddle,
           ball: ball,
-          score_right: 2,
+          score_left: 2,
           score_limit: 3
         )
 

@@ -57,10 +57,10 @@ defmodule Pong.Movement do
   defp apply_score(game) do
     cond do
       ball_passed_left_paddle?(game.ball, game.paddle_left) ->
-        update_score(game, :left)
+        update_score(game, :right)
 
       ball_passed_right_paddle?(game.ball, game.paddle_right) ->
-        update_score(game, :right)
+        update_score(game, :left)
 
       true ->
         {[], game}
