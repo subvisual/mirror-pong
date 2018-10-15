@@ -150,10 +150,11 @@ defmodule Pong.Engine do
       defp add_player_to(state, player_id, value) do
         player_ref = String.to_existing_atom("player_#{player_id}")
         paddle_ref = String.to_existing_atom("paddle_#{player_id}")
-        new_state = Map.put(state, player_ref, value)
 
-        if players_ready?(new_state.player_left, new_state.player_right),
-          do: prepare_start(state)
+        new_state =
+          state
+          |> Map.put(player_ref, value)
+          |> prepare_start()
 
         player_data = %{
           player_id: player_id,
@@ -185,10 +186,29 @@ defmodule Pong.Engine do
       defp find_event(events, event),
         do: Enum.find(events, false, fn {e, _} -> event == e end)
 
-      defp prepare_start(%{game: game, start_delay: start_delay}) do
-        Renderer.start(game, start_delay)
+      defp prepare_start(state) do
+        %{
+          game: game,
+          player_left: player_left,
+          player_right: player_right,
+          in_progress: in_progress,
+          start_delay: start_delay,
+          period: period
+        } = state
 
-        schedule_work(start_delay)
+        cond do
+          in_progress ->
+            schedule_work(period)
+            state
+
+          players_ready?(player_left, player_right) ->
+            Renderer.start(game, start_delay)
+            schedule_work(start_delay)
+            %{state | in_progress: true}
+
+          true ->
+            state
+        end
       end
 
       defp push_event(%{events: events} = state, event) do
@@ -206,6 +226,7 @@ defmodule Pong.Engine do
           start_delay: start_delay,
           player_left: nil,
           player_right: nil,
+          in_progress: false,
           movements: Movement.Buffer.new(),
           events: []
         ]
