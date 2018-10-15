@@ -10,6 +10,16 @@
   background-color: var(--charcoal);
 }
 
+.score {
+  position: absolute;
+
+  top: 10%;
+  left: 50%;
+  z-index: 1;
+
+  transform: translate(-50%, -50%);
+}
+
 @keyframes fadeinout {
   0% {
     opacity: 0;

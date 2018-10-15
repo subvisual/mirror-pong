@@ -1,0 +1,8 @@
+@import '../../settings.css';
+
+.root {
+  color: white;
+
+  font-family: var(--font-family-monospace);
+  font-size: var(--size-112);
+}
