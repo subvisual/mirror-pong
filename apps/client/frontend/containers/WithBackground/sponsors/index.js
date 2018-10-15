@@ -18,7 +18,7 @@ import Xing from './assets/xing.svg';
 
 const preloadImage = url => {
   const image = new Image();
-console.log(url);
+
   image.src = url;
 };
 
