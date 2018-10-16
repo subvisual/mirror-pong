@@ -44,7 +44,7 @@ defmodule Pong.EngineTest do
   describe "handle_call/3 for :join messages" do
     test "starts the renderer" do
       with_mock Renderer, start: fn _, _ -> :ok end do
-        state = build_pong_state(player_left: true)
+        state = build_pong_state(player_left: 1)
 
         {:reply, _, _} = Engine.handle_call(:join, self(), state)
 
@@ -54,7 +54,7 @@ defmodule Pong.EngineTest do
 
     test "schedules work if all players are ready" do
       with_mock Renderer, start: fn _, _ -> :ok end do
-        state = build_pong_state(player_left: true, period: 1, start_delay: 1)
+        state = build_pong_state(player_left: 1, period: 1, start_delay: 1)
 
         {:reply, _, _} = Engine.handle_call(:join, self(), state)
 
@@ -96,7 +96,7 @@ defmodule Pong.EngineTest do
     end
 
     test "ends the game if there aren't enough players" do
-      state = build_pong_state(player_right: true, player_left: true)
+      state = build_pong_state(player_right: 1, player_left: 1)
 
       assert {:reply, :ok, new_state} =
                Engine.handle_call({:leave, :right}, self(), state)
@@ -112,7 +112,7 @@ defmodule Pong.EngineTest do
       # have received after it did. We can take this test further by spawning
       # the same process again but sending the :work message immediately and
       # asserting that it replied back
-      state = build_pong_state(player_right: true, period: 200)
+      state = build_pong_state(player_right: 1, period: 200)
       pid = self()
 
       spawn fn ->
@@ -152,8 +152,8 @@ defmodule Pong.EngineTest do
       with_mock Renderer, stop: fn -> :ok end do
         state =
           build_pong_state(
-            player_left: true,
-            player_right: true
+            player_left: 1,
+            player_right: 1
           )
 
         {:reply, _, new_state} = Engine.handle_call(:stop, self(), state)
@@ -171,8 +171,8 @@ defmodule Pong.EngineTest do
       with_mock Renderer, stop: fn -> :ok end do
         state =
           build_pong_state(
-            player_left: true,
-            player_right: true
+            player_left: 1,
+            player_right: 1
           )
 
         {:reply, _, _} = Engine.handle_call(:stop, self(), state)
@@ -193,7 +193,7 @@ defmodule Pong.EngineTest do
 
     test "applies the movements to the game" do
       with_mock Movement, apply_to: fn _, _ -> {[], :ok} end do
-        state = build_pong_state(player_left: true, player_right: true)
+        state = build_pong_state(player_left: 1, player_right: 1)
 
         {:noreply, _} = Engine.handle_info(:work, state)
 
@@ -203,7 +203,7 @@ defmodule Pong.EngineTest do
 
     test "resets the movement buffer" do
       with_mock Movement, apply_to: fn _, _ -> {[], :ok} end do
-        state = build_pong_state(player_left: true, player_right: true)
+        state = build_pong_state(player_left: 1, player_right: 1)
 
         {:noreply, new_state} = Engine.handle_info(:work, state)
 
@@ -215,7 +215,7 @@ defmodule Pong.EngineTest do
       mock_apply_to = fn game, _ -> {[{"a new", "event"}], game} end
 
       with_mock Movement, apply_to: mock_apply_to do
-        state = build_pong_state(player_left: true, player_right: true)
+        state = build_pong_state(player_left: 1, player_right: 1)
 
         {:noreply, new_state} = Engine.handle_info(:work, state)
 
@@ -229,8 +229,8 @@ defmodule Pong.EngineTest do
       with_mock Movement, apply_to: mock_apply_to do
         state =
           build_pong_state(
-            player_left: true,
-            player_right: true,
+            player_left: 1,
+            player_right: 1,
             start_delay: 1,
             period: 1_000
           )
@@ -247,8 +247,8 @@ defmodule Pong.EngineTest do
       with_mock Movement, apply_to: mock_apply_to do
         state =
           build_pong_state(
-            player_left: true,
-            player_right: true,
+            player_left: 1,
+            player_right: 1,
             start_delay: 1,
             period: 1
           )
@@ -267,8 +267,8 @@ defmodule Pong.EngineTest do
       with_mock Movement, apply_to: mock_apply_to do
         state =
           build_pong_state(
-            player_left: true,
-            player_right: true,
+            player_left: 1,
+            player_right: 1,
             start_delay: 1,
             period: 1
           )
