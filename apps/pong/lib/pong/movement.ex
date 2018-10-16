@@ -88,11 +88,15 @@ defmodule Pong.Movement do
   end
 
   defp apply_paddle_movements(paddle, movements, board) do
-    Enum.reduce(
-      movements,
-      paddle,
-      &apply_paddle_movement(&2, &1, board)
-    )
+    if Enum.empty?(movements) do
+      apply_paddle_movement(paddle, "no_movement", board)
+    else
+      Enum.reduce(
+        movements,
+        paddle,
+        &apply_paddle_movement(&2, &1, board)
+      )
+    end
   end
 
   defp apply_paddle_movement(paddle, direction, board) do
@@ -112,7 +116,11 @@ defmodule Pong.Movement do
   defp apply_board_collision(ball, board) do
     cond do
       ball_in_board_height_limits?(ball, board) ->
-        Ball.reverse_vector_component(ball, :y)
+        if ball.spin != 0 do
+          Ball.apply_spin(ball, ball.spin)
+        else
+          Ball.reverse_vector_component(ball, :y)
+        end
 
       ball_in_board_width_limits?(ball, board) ->
         Ball.reverse_vector_component(ball, :x)
@@ -124,7 +132,7 @@ defmodule Pong.Movement do
 
   defp apply_leftside_collision(ball, paddle) do
     if ball_collided_leftside?(ball, paddle) do
-      Ball.reverse_vector_component(ball, :x)
+      apply_paddle_collision(ball, paddle)
     else
       ball
     end
@@ -132,10 +140,19 @@ defmodule Pong.Movement do
 
   defp apply_rightside_collision(ball, paddle) do
     if ball_collided_rightside?(ball, paddle) do
-      Ball.reverse_vector_component(ball, :x)
+      apply_paddle_collision(ball, paddle)
     else
       ball
     end
+  end
+
+  defp apply_paddle_collision(ball, %{movement: 0}),
+    do: Ball.reverse_vector_component(ball, :x)
+
+  defp apply_paddle_collision(ball, paddle) do
+    ball
+    |> Ball.add_spin(paddle.movement)
+    |> Ball.reverse_vector_component(:x)
   end
 
   defp ball_collided_leftside?(ball, paddle) do
@@ -146,6 +163,10 @@ defmodule Pong.Movement do
   defp ball_collided_rightside?(ball, paddle) do
     ball.x + ball.radius >= paddle.x and ball.y <= paddle.y + paddle.height / 2 and
       ball.y >= paddle.y - paddle.height / 2
+  end
+
+  defp paddle_moving?(paddle) do
+    paddle.movement != 0
   end
 
   defp ball_in_board_height_limits?(ball, board) do

@@ -5,10 +5,12 @@ defmodule Pong.Game.Ball do
     :vector_x,
     :vector_y,
     :radius,
-    :speed
+    :speed,
+    :spin
   ]
 
   @default_speed 2
+  @default_spin 0
   @min_vector_value 4
   @max_vector_value 8
 
@@ -38,7 +40,8 @@ defmodule Pong.Game.Ball do
       y: start_y,
       vector_x: vector_x,
       vector_y: vector_y,
-      speed: speed
+      speed: @default_speed,
+      spin: @default_spin
     }
   end
 
@@ -64,6 +67,33 @@ defmodule Pong.Game.Ball do
     vector_component = String.to_existing_atom("vector_#{component}")
 
     Map.update!(ball, vector_component, &(&1 * -1))
+  end
+
+  def add_spin(ball, direction) do
+    cond do
+      ball_has_same_direction?(ball, direction) ->
+        %{ball | spin: 1}
+
+      ball_has_opposite_direction?(ball, direction) ->
+        %{ball | spin: -1}
+
+      true ->
+        ball
+    end
+  end
+
+  def apply_spin(ball, 1) do
+    # spin up reduces the y movement and increases the speed
+    updated_vector_y = ball.vector_y - random_vector_change()
+    updated_speed = ball.speed + 1
+    %{ball | spin: 0, vector_y: updated_vector_y, speed: updated_speed}
+  end
+
+  def apply_spin(ball, -1) do
+    # spin down increases the y movement and reduces the speed
+    updated_vector_y = ball.vector_y + random_vector_change()
+    updated_speed = ball.speed - 1
+    %{ball | spin: 0, vector_y: updated_vector_y, speed: updated_speed}
   end
 
   defp generate_random_vector do
@@ -98,4 +128,17 @@ defmodule Pong.Game.Ball do
 
     Map.put(ball, coordinate, clamped_coordinate)
   end
+
+  defp ball_has_same_direction?(ball, direction) do
+    (ball.vector_y > 0 and direction > 0) or
+      (ball.vector_y < 0 and direction < 0)
+  end
+
+  defp ball_has_opposite_direction?(ball, direction) do
+    (ball.vector_y > 0 and direction < 0) or
+      (ball.vector_y < 0 and direction > 0)
+  end
+
+  defp random_vector_change,
+    do: Enum.random([0.15, 0.2, 0.25, 0.3])
 end

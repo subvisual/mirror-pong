@@ -5,7 +5,8 @@ defmodule Pong.Game.Paddle do
     :x,
     :y,
     :speed,
-    :fill
+    :fill,
+    :movement
   ]
 
   import Pong.Config, only: [config!: 2]
@@ -70,11 +71,15 @@ defmodule Pong.Game.Paddle do
 
   @spec apply_vector(t(), :up) :: t()
   def apply_vector(%__MODULE__{y: y} = paddle, :up),
-    do: %{paddle | y: y + @default_speed}
+    do: %{paddle | y: y + @default_speed, movement: 1}
 
   @spec apply_vector(t(), :down) :: t()
   def apply_vector(%__MODULE__{y: y} = paddle, :down),
-    do: %{paddle | y: y - @default_speed}
+    do: %{paddle | y: y - @default_speed, movement: -1}
+
+  @spec apply_vector(t(), direction) :: t()
+  def apply_vector(%__MODULE__{y: y} = paddle, _),
+    do: %{paddle | y: y, movement: 0}
 
   @spec ensure_between(t(), integer(), integer()) :: t()
   def ensure_between(%__MODULE__{} = paddle, min, max) do
