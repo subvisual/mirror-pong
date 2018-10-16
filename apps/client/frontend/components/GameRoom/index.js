@@ -55,6 +55,8 @@ export default class GameRoom extends Component {
     this.metadataChannel.on('game_over', () => {
       this.setState({ gameOver: true });
 
+      this.leaveChannel();
+
       setTimeout(() => {
         window.location.href = '/';
       }, 3000);
