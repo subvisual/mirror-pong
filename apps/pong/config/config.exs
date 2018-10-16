@@ -4,7 +4,7 @@ config :pong, Pong,
   fps: 60,
   start_delay: 3_000
 
-config :pong, Pong.Game, score_limit: 3
+config :pong, Pong.Game, score_limit: 5
 
 config :pong, Pong.Game.Board,
   width: 1000,
@@ -13,11 +13,12 @@ config :pong, Pong.Game.Board,
 config :pong, Pong.Game.Ball,
   start_x: 500,
   start_y: 500,
-  radius: 5
+  radius: 7,
+  speed: 5
 
 config :pong, Pong.Game.Paddle,
-  width: 10,
-  height: 100,
+  width: 15,
+  height: 120,
   margin: 30,
   fills: [
     # anakiwa (cyan)
@@ -31,9 +32,7 @@ config :pong, Pong.Game.Paddle,
     # perfume (purple)
     "#BD93F9",
     # persimmon (red)
-    "#FF5555",
-    # honeysuckle (yellow)
-    "#F1FA8C"
+    "#FF5555"
   ]
 
 import_config "#{Mix.env()}.exs"

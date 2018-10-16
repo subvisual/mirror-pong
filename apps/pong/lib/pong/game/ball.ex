@@ -21,22 +21,14 @@ defmodule Pong.Game.Ball do
           speed: integer()
         }
 
-  @type default :: %__MODULE__{
-          x: integer(),
-          y: integer(),
-          vector_x: float(),
-          vector_y: float(),
-          radius: integer(),
-          speed: 2
-        }
+  import Pong.Config, only: [config!: 2, config: 3]
 
-  import Pong.Config, only: [config!: 2]
-
-  @spec new() :: default()
+  @spec new() :: t()
   def new do
     start_x = config!(__MODULE__, :start_x)
     start_y = config!(__MODULE__, :start_y)
     radius = config!(__MODULE__, :radius)
+    speed = config(__MODULE__, :speed, @default_speed)
 
     {vector_x, vector_y} = generate_random_vector()
 
@@ -46,7 +38,7 @@ defmodule Pong.Game.Ball do
       y: start_y,
       vector_x: vector_x,
       vector_y: vector_y,
-      speed: @default_speed
+      speed: speed
     }
   end
 
