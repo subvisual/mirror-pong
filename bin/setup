@@ -33,3 +33,9 @@ MIX_ENV=$env mix ecto.create
 echo "[setup]: Setting up node"
 ensure_yarn_exists
 (cd apps/client && yarn install)
+
+if [[ "$env" == "prod" ]]; then
+  (cd apps/client && yarn build)
+
+  mix phx.digest
+fi

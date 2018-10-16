@@ -1,0 +1,4 @@
+export POOL_SIZE=18
+export HOST=localhost
+export DATABASE_URL="postgres://postgres:postgres@localhost/client_prod"
+export SECRET_KEY_BASE="pGBQkTTuVQ4lEB9RdYDzvO/U+58iQjlxF63Sure1vGTk1Rt3t3ctHs2EA6KeoAJe"

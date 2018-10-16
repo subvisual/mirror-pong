@@ -22,3 +22,6 @@ npm-debug.log*
 .cache
 
 priv/static/assets
+priv/static/cache*
+priv/static/robots*
+priv/static/favicon*
