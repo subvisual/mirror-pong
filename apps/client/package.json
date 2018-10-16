@@ -6,7 +6,7 @@
   "main": "frontend/index.js",
   "private": true,
   "scripts": {
-    "deploy": "NODE_ENV=production webpack --mode production",
+    "build": "NODE_ENV=production webpack --mode production",
     "dev-server": "webpack-dev-server --hot --mode development",
     "lint": "eslint frontend && stylelint frontend/components/**/*.css"
   },
