@@ -44,7 +44,6 @@
 }
 
 .logo * img {
-  width: auto;
+  width: 300px;
   height: auto;
-  max-width: 100%;
 }
