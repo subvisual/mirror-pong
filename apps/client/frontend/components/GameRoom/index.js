@@ -9,9 +9,9 @@ import './index.css';
 export default class GameRoom extends Component {
   state = {
     loading: true,
-    status: null,
     paddleColor: null,
-    gameOver: false,
+    playerId: null,
+    winner: false,
   };
 
   constructor(props) {
@@ -23,7 +23,7 @@ export default class GameRoom extends Component {
     this.joinChannel(this.playChannel).then(response => {
       this.setState({
         loading: false,
-        status: 'joined',
+        playerId: response.player_id,
         paddleColor: response.paddle_color,
       });
     });
@@ -47,15 +47,17 @@ export default class GameRoom extends Component {
     } catch (error) {
       console.log('Unable to join', error); // eslint-disable-line
 
-      this.setState({ loading: false, status: 'error' });
+      this.setState({ loading: false });
     }
   };
 
   subscribeToGameOver = () => {
-    this.metadataChannel.on('game_over', () => {
-      this.setState({ gameOver: true });
+    this.metadataChannel.on('game_over', data => {
+      const winner = data.score_right > data.score_left ? 'right' : 'left';
+      this.setState({ winner });
 
-      this.leaveChannel();
+      this.leaveChannel(this.playChannel);
+      this.leaveChannel(this.metadataChannel);
 
       setTimeout(() => {
         window.location.href = '/';
@@ -73,20 +75,28 @@ export default class GameRoom extends Component {
     }
   };
 
-  renderInnerContent() {
-    const { status } = this.state;
+  renderResult() {
+    const { winner, playerId } = this.state;
 
-    if (status === 'joined') return <Controller channel={this.playChannel} />;
+    if (winner === playerId) return <Centered>You won!</Centered>;
+
+    return <Centered>You lost!</Centered>;
+  }
+
+  renderInnerContent() {
+    const { playerId } = this.state;
+
+    if (playerId) return <Controller channel={this.playChannel} />;
 
     return 'Could not join the game!';
   }
 
   render() {
-    const { loading, gameOver } = this.state;
+    const { loading, winner } = this.state;
 
     if (loading) return null;
 
-    if (gameOver) return <Centered>Game Over!</Centered>;
+    if (winner) return this.renderResult();
 
     const { paddleColor: backgroundColor } = this.state;
 
