@@ -1,0 +1,50 @@
+version: v1.0
+name: Mirror Pong
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+
+blocks:
+  - name: "Build"
+    task:
+      env_vars:
+        - name: MIX_ENV
+          value: test
+        - name: ERL_VERSION
+          value: 20.3
+        - name: EX_VERSION
+          value: 1.7.3
+        - name: NODE_VERSION
+          value: 10.10.0
+
+      jobs:
+        - name: Cache dependencies
+          task:
+            jobs:
+              - name: 'npm'
+                commands:
+                  - checkout
+                  - npm install
+                  - cache store v1-node-modules-$(checksum package.json) node_modules
+
+  - name: "Pong tests"
+    task:
+      jobs:
+      - name: Pong
+        commands:
+          - checkout
+          - mix cmd --app pong mix test --color
+
+  - name: "Client tests"
+    task:
+      jobs:
+      - name: Client
+        commands:
+          - checkout
+          - mix cmd --app client mix test --color
+
+      - name: Lint code
+        commands:
+          - checkout
+          - bin/lint
