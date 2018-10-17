@@ -21,16 +21,23 @@ defmodule ClientWeb.Channels.GameChannel do
 
   def join("game:play", _params, socket) do
     case Pong.join() do
-      {:ok, %{player_id: player_id} = player_data} ->
-        {:ok, player_data, assign(socket, :player_id, player_id)}
+      {:ok, %{player_id: id, player_side: side} = player_data} ->
+        socket_with_assigns =
+          socket
+          |> assign(:player_id, id)
+          |> assign(:player_side, side)
+
+        {:ok, player_data, socket_with_assigns}
 
       {:error, :game_full} ->
         {:error, %{reason: "game full"}}
     end
   end
 
-  def terminate(_msg, %{assigns: %{player_id: player_id}}) do
-    Pong.leave(player_id)
+  def terminate(_msg, %{assigns: %{player_id: _}} = socket) do
+    %{player_id: id, player_side: side} = socket.assigns
+
+    Pong.leave({id, side})
   end
 
   def terminate(_, _), do: :ok
@@ -38,10 +45,10 @@ defmodule ClientWeb.Channels.GameChannel do
   def handle_in(
         "player:move",
         %{"direction" => direction},
-        %{assigns: %{player_id: _}} = socket
+        %{assigns: %{player_id: _, player_side: side}} = socket
       )
       when direction in ["up", "down"] do
-    Pong.move(socket.assigns.player_id, String.to_atom(direction))
+    Pong.move(side, String.to_atom(direction))
 
     {:noreply, socket}
   end

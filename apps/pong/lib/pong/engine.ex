@@ -10,16 +10,16 @@ defmodule Pong.Engine do
           fps: integer(),
           period: float(),
           start_delay: state(),
-          player_left: any(),
-          player_right: any(),
+          left: any(),
+          right: any(),
           movements: Movement.Buffer.t(),
           events: list()
         }
 
-  @callback add_player(left :: any(), right :: any()) ::
+  @callback add_player(left :: any(), right :: any(), id :: any()) ::
               {:ok, Game.player_ref(), any()} | {:error, :game_full}
 
-  @callback remove_player(player_id :: Game.player_ref(), player :: any()) ::
+  @callback remove_player(player_id :: any(), player :: any()) ::
               {any(), any()} | {:error, :invalid_player}
 
   @callback players_ready?(left :: any(), right :: any()) :: boolean()
@@ -45,8 +45,8 @@ defmodule Pong.Engine do
         GenServer.call(__MODULE__, :join)
       end
 
-      def leave(player_id) do
-        GenServer.call(__MODULE__, {:leave, player_id})
+      def leave({player_id, player_side}) do
+        GenServer.call(__MODULE__, {:leave, player_id, player_side})
       end
 
       def stop do
@@ -57,8 +57,8 @@ defmodule Pong.Engine do
         GenServer.call(__MODULE__, :consume)
       end
 
-      def move(player, direction) do
-        GenServer.cast(__MODULE__, {:move, player, direction})
+      def move(side, direction) do
+        GenServer.cast(__MODULE__, {:move, side, direction})
       end
 
       def init(:ok) do
@@ -68,19 +68,21 @@ defmodule Pong.Engine do
       end
 
       def handle_cast(
-            {:move, player, direction},
+            {:move, side, direction},
             %{movements: movements} = state
           ) do
-        updated_movements = Movement.Buffer.add(movements, player, direction)
+        updated_movements = Movement.Buffer.add(movements, side, direction)
         new_state = %{state | movements: updated_movements}
 
         {:noreply, new_state}
       end
 
       def handle_call(:join, _from, state) do
-        case add_player(state.player_left, state.player_right) do
-          {:ok, player_id, value} ->
-            {player_data, new_state} = add_player_to(state, player_id, value)
+        id = UUID.uuid4()
+
+        case add_player(state.left, state.right, id) do
+          {:ok, side, value} ->
+            {player_data, new_state} = add_player_to(state, id, side, value)
 
             {:reply, {:ok, player_data}, new_state}
 
@@ -89,9 +91,9 @@ defmodule Pong.Engine do
         end
       end
 
-      def handle_call({:leave, player_id}, _from, state) do
+      def handle_call({:leave, player_id, player_side}, _from, state) do
         new_state =
-          case remove_player_from(state, player_id) do
+          case remove_player_from(state, player_id, player_side) do
             {:ok, state_without_player} ->
               end_game_if_over(state_without_player)
 
@@ -146,81 +148,48 @@ defmodule Pong.Engine do
         end
       end
 
-      defp add_player_to(state, player_id, value) do
-        player_ref = String.to_existing_atom("player_#{player_id}")
-        paddle_ref = String.to_existing_atom("paddle_#{player_id}")
+      defp add_player_to(state, id, side, value) do
+        paddle_ref = String.to_existing_atom("paddle_#{side}")
         paddle_color = Map.get(state.game, paddle_ref).fill
 
         new_state =
           state
-          |> Map.put(player_ref, value)
+          |> Map.put(side, value)
           |> prepare_start()
 
         player_data = %{
-          player_id: player_id,
+          player_id: id,
+          player_side: side,
           paddle_color: paddle_color
         }
-
-        IO.puts("[join]: Added player #{player_id}")
-        IO.puts("            game in progress? #{new_state.in_progress}")
-        IO.puts("            game events: #{inspect(new_state.events)}")
-
-        IO.puts(
-          "            game players: left - #{new_state.player_left} // right - #{
-            new_state.player_right
-          }"
-        )
-
-        IO.puts("\n\n\n")
 
         {player_data, new_state}
       end
 
-      defp remove_player_from(state, player_id) do
-        player_ref = String.to_existing_atom("player_#{player_id}")
-        player = Map.get(state, player_ref)
+      defp remove_player_from(state, id, side) do
+        side_value = Map.get(state, side)
 
-        case remove_player(player_id, player) do
+        case remove_player(id, side_value) do
           {:error, :invalid_player} = error ->
             error
 
-          {:ok, new_player} ->
-            new_state = Map.put(state, player_ref, new_player)
+          {:ok, new_value} ->
+            new_state = Map.put(state, side, new_value)
 
-            new_new_state =
-              push_event(
-                new_state,
-                {"player_left",
-                 %{
-                   player_left: new_state.player_left,
-                   player_right: new_state.player_right
-                 }}
-              )
-
-            IO.puts("[leave]: Removed player #{player_id}")
-
-            IO.puts(
-              "            game in progress? #{new_new_state.in_progress}"
-            )
-
-            IO.puts(
-              "             game events: #{inspect(new_new_state.events)}"
-            )
-
-            IO.puts(
-              "            game players: left - #{new_new_state.player_left} // right - #{
-                new_new_state.player_right
-              }"
-            )
-
-            IO.puts("\n\n\n")
-
-            {:ok, new_new_state}
+            {:ok,
+             push_event(
+               new_state,
+               {"player_left",
+                %{
+                  player_left: new_state.left,
+                  player_right: new_state.right
+                }}
+             )}
         end
       end
 
       defp end_game_if_over(state) do
-        if players_ready?(state.player_left, state.player_right) do
+        if players_ready?(state.left, state.right) do
           state
         else
           wait_for_next_cycle(state.period + 100)
@@ -242,8 +211,8 @@ defmodule Pong.Engine do
       defp prepare_start(state) do
         %{
           game: game,
-          player_left: player_left,
-          player_right: player_right,
+          left: left,
+          right: right,
           in_progress: in_progress,
           start_delay: start_delay,
           period: period
@@ -253,7 +222,7 @@ defmodule Pong.Engine do
           in_progress ->
             state
 
-          players_ready?(player_left, player_right) ->
+          players_ready?(left, right) ->
             Renderer.start(game, start_delay)
             schedule_work(start_delay)
             %{state | in_progress: true}
@@ -276,8 +245,8 @@ defmodule Pong.Engine do
           fps: fps,
           period: Kernel.trunc(1 / fps * 1_000),
           start_delay: start_delay,
-          player_left: nil,
-          player_right: nil,
+          left: nil,
+          right: nil,
           in_progress: false,
           movements: Movement.Buffer.new(),
           events: []

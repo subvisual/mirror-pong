@@ -5,37 +5,35 @@ defmodule Pong.Engines.LimitedNumber do
 
       @limit unquote(opts)[:limit]
 
-      def add_player(nil, _), do: {:ok, :left, 1}
-      def add_player(_, nil), do: {:ok, :right, 1}
+      def add_player(nil, _, id), do: {:ok, :left, MapSet.new([id])}
+      def add_player(_, nil, id), do: {:ok, :right, MapSet.new([id])}
 
-      def add_player(left, right)
-          when left >= @limit or right >= @limit,
-          do: {:error, :game_full}
+      def add_player(left, right, id) do
+        left_size = MapSet.size(left)
+        right_size = MapSet.size(right)
 
-      def add_player(left, right)
-          when left <= right,
-          do: {:ok, :left, left + 1}
+        cond do
+          left_size >= @limit and right_size >= @limit ->
+            {:error, :game_full}
 
-      def add_player(left, right)
-          when right < left,
-          do: {:ok, :right, right + 1}
+          left_size > right_size ->
+            {:ok, :right, MapSet.put(right, id)}
+
+          true ->
+            {:ok, :left, MapSet.put(left, id)}
+        end
+      end
 
       def remove_player(_, nil),
         do: {:error, :invalid_player}
 
-      def remove_player(_, value)
-          when value > 0,
-          do: {:ok, value - 1}
+      def remove_player(id, set) do
+        {:ok, MapSet.delete(set, id)}
+      end
 
-      def remove_player(:right, right)
-          when right > 0,
-          do: {:ok, right - 1}
-
-      def remove_player(_, _),
-        do: {:error, :invalid_player}
-
-      def players_ready?(left, right),
-        do: left && left > 0 && right && right > 0
+      def players_ready?(left, right) do
+        left && MapSet.size(left) > 0 && right && MapSet.size(right) > 0
+      end
     end
   end
 end

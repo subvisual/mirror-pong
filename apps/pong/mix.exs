@@ -27,6 +27,7 @@ defmodule Pong.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:elixir_uuid, "~> 1.2"},
       {:ex_machina, "~> 2.2", only: :test},
       {:mock, "~> 0.3.0", only: :test}
     ]
