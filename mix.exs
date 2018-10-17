@@ -10,7 +10,7 @@ defmodule MirrorPong.MixProject do
       build_path: build_path(),
       dialyzer: [
         plt_add_deps: :transitive,
-        plt_add_apps: [:mix],
+        plt_add_apps: [:mix, :ex_unit],
         flags: [:underspecs, :race_conditions]
       ]
     ]
@@ -24,7 +24,7 @@ defmodule MirrorPong.MixProject do
   defp deps do
     [
       {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev, :test], runtime: false}
     ]
   end
 
