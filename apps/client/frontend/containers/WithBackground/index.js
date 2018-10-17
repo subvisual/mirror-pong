@@ -9,7 +9,7 @@ import './index.css';
 export default function(Child) {
   return class WithBackground extends Component {
     state = {
-      index: Sponsors.length,
+      index: 0,
     };
 
     componentDidMount() {
@@ -36,11 +36,6 @@ export default function(Child) {
     }
 
     render() {
-      const { index } = this.state;
-
-      const renderLogo =
-        index === Sponsors.length ? 'Mirror Conf' : this.renderSponsorLogo();
-
       return (
         <Fragment>
           <div styleName="root">
@@ -48,7 +43,7 @@ export default function(Child) {
               <Scoreboard />
             </div>
             <div styleName="logo">
-              <Centered>{renderLogo}</Centered>
+              <Centered>{this.renderSponsorLogo()}</Centered>
             </div>
           </div>
           <Child {...this.props} />
