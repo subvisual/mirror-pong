@@ -149,6 +149,7 @@ defmodule Pong.Engine do
       defp add_player_to(state, player_id, value) do
         player_ref = String.to_existing_atom("player_#{player_id}")
         paddle_ref = String.to_existing_atom("paddle_#{player_id}")
+        paddle_color = Map.get(state.game, paddle_ref).fill
 
         new_state =
           state
@@ -157,8 +158,20 @@ defmodule Pong.Engine do
 
         player_data = %{
           player_id: player_id,
-          paddle_color: Map.get(new_state.game, paddle_ref).fill
+          paddle_color: paddle_color
         }
+
+        IO.puts("[join]: Added player #{player_id}")
+        IO.puts("            game in progress? #{new_state.in_progress}")
+        IO.puts("            game events: #{inspect(new_state.events)}")
+
+        IO.puts(
+          "            game players: left - #{new_state.player_left} // right - #{
+            new_state.player_right
+          }"
+        )
+
+        IO.puts("\n\n\n")
 
         {player_data, new_state}
       end
@@ -174,15 +187,35 @@ defmodule Pong.Engine do
           {:ok, new_player} ->
             new_state = Map.put(state, player_ref, new_player)
 
-            {:ok,
-             push_event(
-               new_state,
-               {"player_left",
-                %{
-                  player_left: new_state.player_left,
-                  player_right: new_state.player_right
-                }}
-             )}
+            new_new_state =
+              push_event(
+                new_state,
+                {"player_left",
+                 %{
+                   player_left: new_state.player_left,
+                   player_right: new_state.player_right
+                 }}
+              )
+
+            IO.puts("[leave]: Removed player #{player_id}")
+
+            IO.puts(
+              "            game in progress? #{new_new_state.in_progress}"
+            )
+
+            IO.puts(
+              "             game events: #{inspect(new_new_state.events)}"
+            )
+
+            IO.puts(
+              "            game players: left - #{new_new_state.player_left} // right - #{
+                new_new_state.player_right
+              }"
+            )
+
+            IO.puts("\n\n\n")
+
+            {:ok, new_new_state}
         end
       end
 
