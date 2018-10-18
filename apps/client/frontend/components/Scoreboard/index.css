@@ -6,3 +6,7 @@
   font-family: var(--font-family-monospace);
   font-size: var(--size-112);
 }
+
+.url {
+  font-size: var(--size-56);
+}

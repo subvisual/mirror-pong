@@ -1,0 +1,5 @@
+@import '../../settings.css';
+
+.url {
+  font-size: var(--size-72);
+}

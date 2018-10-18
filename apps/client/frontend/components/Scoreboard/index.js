@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
+import Centered from '../Centered';
 
 import Channel from '../../lib/channel';
 
@@ -68,6 +69,14 @@ export default class Scoreboard extends Component {
 
     if (loading) return null;
 
-    return <div styleName="root">{`${left} - ${right}`}</div>;
+    return (
+      <Centered>
+        <div styleName="root">
+          {`${left} - ${right}`}
+          <br />
+          <span styleName="url">pong.mirrorconf.com</span>
+        </div>
+      </Centered>
+    );
   }
 }

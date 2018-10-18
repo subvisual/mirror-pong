@@ -5,6 +5,8 @@ import Centered from '../Centered';
 import BoardCountdown from '../BoardCountdown';
 import Channel from '../../lib/channel';
 
+import './index.css';
+
 export default class BoardRoom extends Component {
   state = {
     game: null,
@@ -79,11 +81,23 @@ export default class BoardRoom extends Component {
     const { game, delay, gameOver } = this.state;
 
     if (gameOver) {
-      return <Centered>Game Over!</Centered>;
+      return (
+        <Centered>
+          Game Over!
+          <br />
+          <span styleName="url">Join at pong.mirrorconf.com</span>
+        </Centered>
+      );
     }
 
     if (_.isNil(game)) {
-      return <Centered>Currently waiting for players!</Centered>;
+      return (
+        <Centered>
+          Waiting for players.
+          <br />
+          <span styleName="url">Join at pong.mirrorconf.com</span>
+        </Centered>
+      );
     }
 
     return <BoardCountdown delay={delay} {...this.props} game={game} />;
